@@ -26,11 +26,6 @@ function App() {
   const location = useLocation();
 
   return (
-    // <div className="App">
-    //   <header className="App-header">
-
-    //   </header>
-    // </div>
     <ThemeProvider theme={theme}>
       <CssBaseline />
       <div className="App">
