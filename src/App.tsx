@@ -36,8 +36,10 @@ function App() {
       <div className="App">
         <div className="App-header">
           <Suspense fallback={<ClockLoader />}>
-            <Switch location={location} key={location.pathname}>
-              <Redirect from="/" to={mainPage} />
+            <Switch key={location.pathname}>
+              <Route exact path="/">
+                <Redirect to={mainPage} />
+              </Route>
               {map(routes, renderRoute)}
             </Switch>
           </Suspense>
