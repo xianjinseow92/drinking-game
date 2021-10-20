@@ -37,7 +37,7 @@ function App() {
         <div className="App-header">
           <Suspense fallback={<ClockLoader />}>
             <Switch key={location.pathname}>
-              <Route exact path="/">
+              <Route exact path={mainPage + "/"}>
                 <Redirect to={mainPage} />
               </Route>
               {map(routes, renderRoute)}
