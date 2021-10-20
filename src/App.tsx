@@ -7,8 +7,9 @@ import theme from "styles/theme";
 import CssBaseline from "@mui/material/CssBaseline";
 
 // Route-related
-import { Switch, Route, useLocation } from "react-router-dom";
+import { Switch, Route, useLocation, Redirect } from "react-router-dom";
 import routes from "routes";
+import { mainPage } from "routes";
 
 // Utilities
 import map from "lodash/map";
@@ -36,7 +37,7 @@ function App() {
         <div className="App-header">
           <Suspense fallback={<ClockLoader />}>
             <Switch location={location} key={location.pathname}>
-              {/* <GameSelectPage /> */}
+              <Redirect from="/" to={mainPage} />
               {map(routes, renderRoute)}
             </Switch>
           </Suspense>
