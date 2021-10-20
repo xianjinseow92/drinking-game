@@ -37,13 +37,12 @@ function App() {
         <div className="App-header">
           <Suspense fallback={<ClockLoader />}>
             <Switch key={location.pathname}>
-              <Route exact path={mainPage + "/"}>
-                <Redirect to={mainPage} />
-              </Route>
               {map(routes, renderRoute)}
             </Switch>
           </Suspense>
-          {isNotMainRoute(location.pathname) && <GoBackToMainPage />}
+          {(isNotMainRoute(location.pathname) && location.pathname !== (mainPage + "/")) ? <GoBackToMainPage /> :
+          ""
+          }
         </div>
       </div>
     </ThemeProvider>
