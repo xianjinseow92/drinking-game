@@ -24,7 +24,9 @@ const GoBackToMainPage = (props: any) => {
             width: "100%",
             position: "fixed",
             bottom: "10px",
-            left: 0
+            left: 0,
+            display: "flex",
+            justifyContent: "center"
         }
     }))();
 
