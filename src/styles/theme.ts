@@ -50,6 +50,13 @@ let theme = createTheme({
         ...rootBodyStyles,
       },
     },
+    MuiTypography: {
+      styleOverrides: {
+        root: {
+          textAlign: "center"
+        }
+      }
+    }
   },
 });
 
