@@ -53,7 +53,8 @@ let theme = createTheme({
     MuiTypography: {
       styleOverrides: {
         root: {
-          textAlign: "center"
+          textAlign: "center",
+          marginBottom: "20px"
         }
       }
     }
