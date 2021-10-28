@@ -17,6 +17,7 @@ import { IDeck } from "types/types";
 
 // Helpers
 import { getRandomElementFromArray } from "helpers/helpers";
+import { autocompleteClasses } from "@mui/material";
 
 const HigherOrLowerGameBoard = (props: any) => {
   // Style-related
@@ -81,10 +82,11 @@ const HigherOrLowerGameBoard = (props: any) => {
         <div></div>
       ) : (
         <CardImage
+          cardStyles={{marginBottom: marginBottom}}
           src={deck.cards[0].image}
           alt={deck.cards[0].value}
           component="img"
-          sx={{ margin: marginBottom }}
+          sx={{ margin: "auto", height: "100%", width: "100%" }}
         />
       )}
       {/* Notify user that deck has finished */}
