@@ -1,7 +1,6 @@
 import { Suspense } from "react";
 
 // Styles
-import "./App.css";
 import { ThemeProvider } from "@mui/material/styles";
 import theme from "styles/theme";
 import CssBaseline from "@mui/material/CssBaseline";
@@ -33,18 +32,23 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <div className="App">
-        <div className="App-header">
-          <Suspense fallback={<ClockLoader />}>
-            <Switch key={location.pathname}>
-              {map(routes, renderRoute)}
-            </Switch>
-          </Suspense>
-          {(isNotMainRoute(location.pathname) && location.pathname !== (mainPage + "/")) ? <GoBackToMainPage /> :
-          ""
-          }
-        </div>
-      </div>
+      <Suspense fallback={<ClockLoader />}>
+        <Switch key={location.pathname}>
+          {/* Redirect to main page on base url */}
+          <Route exact path="/">
+            <Redirect to={mainPage}/>
+          </Route>
+          {map(routes, renderRoute)}
+        </Switch>
+      </Suspense>
+
+      {/* Allows user to go back to Game Select Page when accessing other pages */}
+      {isNotMainRoute(location.pathname) &&
+      location.pathname !== mainPage + "/" ? (
+        <GoBackToMainPage />
+      ) : (
+        ""
+      )}
     </ThemeProvider>
   );
 }
