@@ -12,7 +12,7 @@ import { getOnlyGameRoutes } from "helpers/helpers";
 // Games / Components
 const GameSelectPage = lazy(() => import("components/GameSelectPage"));
 const HigherOrLowerGameBoard = lazy(
-  () => import("components/higher-or-lower/HigherOrLower.component")
+  () => import("components/games/higher-or-lower/HigherOrLower.component")
 );
 
 // All Routes

@@ -17,7 +17,6 @@ import { IDeck } from "types/types";
 
 // Helpers
 import { getRandomElementFromArray } from "helpers/helpers";
-import { autocompleteClasses } from "@mui/material";
 
 const HigherOrLowerGameBoard = (props: any) => {
   // Style-related
