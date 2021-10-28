@@ -6,6 +6,9 @@ import PageLayout from "layout/PageLayout.component";
 // Common UI Components
 import Button from "@mui/material/Button";
 
+// CustomComponents
+import CardImage from "components/CardImage.component";
+
 // Typography
 import Typography from "@mui/material/Typography";
 
@@ -16,6 +19,9 @@ import { IDeck } from "types/types";
 import { getRandomElementFromArray } from "helpers/helpers";
 
 const HigherOrLowerGameBoard = (props: any) => {
+  // Style-related
+  const marginBottom = "15px";
+
   // Control Variables
   const [deck, setDeck] = useState<IDeck>({
     deck_id: "",
@@ -67,7 +73,6 @@ const HigherOrLowerGameBoard = (props: any) => {
         setIsFetchingCard(false);
       });
   };
-
   return (
     <PageLayout sx={{}}>
       {/* Show nothing first if there are no cards in the deck */}
@@ -75,7 +80,12 @@ const HigherOrLowerGameBoard = (props: any) => {
         // Placeholder to show nothing first
         <div></div>
       ) : (
-        <img src={deck.cards[0].image} alt={deck.cards[0].value} />
+        <CardImage
+          src={deck.cards[0].image}
+          alt={deck.cards[0].value}
+          component="img"
+          sx={{ margin: marginBottom }}
+        />
       )}
       {/* Notify user that deck has finished */}
       {deck.remaining === 0 && deck.cards[0] === undefined && (
@@ -86,11 +96,16 @@ const HigherOrLowerGameBoard = (props: any) => {
         color="secondary"
         onClick={drawCard}
         disabled={!deck.success}
-        sx={{marginBottom: "10px"}}
+        sx={{ marginBottom: marginBottom }}
       >
         {deck.remaining === 52 ? "Begin Game" : "Draw Card"}
       </Button>
-      <Button variant="contained" color="secondary" onClick={reshuffleDeck}>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={reshuffleDeck}
+        sx={{ marginBottom: marginBottom }}
+      >
         Reshuffle Deck
       </Button>
       <Typography variant="subtitle1">

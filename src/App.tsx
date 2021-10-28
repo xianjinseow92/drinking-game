@@ -17,7 +17,7 @@ import map from "lodash/map";
 import { isNotMainRoute } from "helpers/helpers";
 
 // Components
-import ClockLoader from "react-spinners/ClockLoader";
+import LoadingSpinner from "components/spinners/Spinner.component";
 import GoBackToMainPage from "components/go-back-to-main-page/GoBackToMainpage";
 
 const renderRoute = (route: any) => {
@@ -32,7 +32,7 @@ function App() {
   return (
     <ThemeProvider theme={theme}>
       <CssBaseline />
-      <Suspense fallback={<ClockLoader />}>
+      <Suspense fallback={<LoadingSpinner />}>
         <Switch key={location.pathname}>
           {/* Redirect to main page on base url */}
           <Route exact path="/">
