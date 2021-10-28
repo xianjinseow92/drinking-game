@@ -1,7 +1,7 @@
 import { useState, useEffect } from "react";
 
 // Layout
-import Container from "@mui/material/Container";
+import PageLayout from "layout/PageLayout.component";
 
 // Common UI Components
 import Button from "@mui/material/Button";
@@ -69,7 +69,7 @@ const HigherOrLowerGameBoard = (props: any) => {
   };
 
   return (
-    <Container>
+    <PageLayout sx={{}}>
       {/* Show nothing first if there are no cards in the deck */}
       {deck.cards[0] === undefined ? (
         // Placeholder to show nothing first
@@ -83,14 +83,14 @@ const HigherOrLowerGameBoard = (props: any) => {
       )}
       <Button
         variant="contained"
-        color="primary"
+        color="secondary"
         onClick={drawCard}
         disabled={!deck.success}
+        sx={{marginBottom: "10px"}}
       >
         {deck.remaining === 52 ? "Begin Game" : "Draw Card"}
       </Button>
-      <br />
-      <Button variant="contained" color="primary" onClick={reshuffleDeck}>
+      <Button variant="contained" color="secondary" onClick={reshuffleDeck}>
         Reshuffle Deck
       </Button>
       <Typography variant="subtitle1">
@@ -101,7 +101,7 @@ const HigherOrLowerGameBoard = (props: any) => {
           {getRandomElementFromArray(randomFetchingMessages)}
         </Typography>
       )}
-    </Container>
+    </PageLayout>
   );
 };
 

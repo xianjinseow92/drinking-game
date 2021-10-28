@@ -3,8 +3,7 @@ import { useHistory } from "react-router";
 
 // Layout
 import Grid from "@mui/material/Grid";
-import Box from "@mui/material/Box";
-import Container from "@mui/material/Container";
+import PageLayout from "layout/PageLayout.component";
 
 // UI Components
 import Button from "@mui/material/Button";
@@ -31,22 +30,20 @@ const GameSelectPage = (props: any) => {
 
   return (
     // Game Grid
-    <Container component="section">
-      <Box sx={{width: "100%", display: "flex", flexDirection: "column" }}>
-        <Typography
-          variant="h3"
-          sx={{ textAlign: "center", marginBottom: "20px" }}
-        >
-          Welcome to ze best drinking game of yo LIFE!
-        </Typography>
-        <Button
-          variant="contained"
-          color="primary"
-          onClick={goToHigherOrLowerGame}
-        >
-          {removeAllSlashes(cleanKebabString(gameNames.higherOrLower))}
-        </Button>
-      </Box>
+    <PageLayout>
+      <Typography
+        variant="h1"
+        sx={{ textAlign: "center", marginBottom: "20px" }}
+      >
+        <b>Welcome to ze best drinking game of yo LIFE!</b>
+      </Typography>
+      <Button
+        variant="contained"
+        color="secondary"
+        onClick={goToHigherOrLowerGame}
+      >
+        {removeAllSlashes(cleanKebabString(gameNames.higherOrLower))}
+      </Button>
 
       {/* <Grid container spacing={3}>
         <Grid item xs={12} md={6}>
@@ -65,7 +62,7 @@ const GameSelectPage = (props: any) => {
           </Button>
         </Grid>
       </Grid> */}
-    </Container>
+    </PageLayout>
   );
 };
 
