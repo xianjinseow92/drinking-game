@@ -44,7 +44,7 @@ const MindMeldTimer = (props: any) => {
       // because when seconds is set to countdownSeconds with useState
       // useEffect code runs again and sets another interval, therefore starting our countdown again
       // so we quickly clear the timer (interval) when the code runs again
-      // to prevent countdown when 
+      // to prevent countdown when
       setTimerStarted(false); // stop timer
       setSeconds(countdownSeconds); // set
     }
@@ -56,7 +56,7 @@ const MindMeldTimer = (props: any) => {
   const startTimer = () => {
     setTimerStarted(true);
   };
-  
+
   // Logic for passing data back up to controller to control display
   if (timerStarted) {
     handleIsWordSpitStage(false);
@@ -65,10 +65,29 @@ const MindMeldTimer = (props: any) => {
   }
 
   return (
-    <Box>
-      <Typography variant="h2">{seconds}</Typography>
-      <Button onClick={startTimer} variant="contained" color="secondary" disabled={timerStarted}>
-        { timerStarted ? "Get those creative juices flowin!!" : "Begin ze game"}
+    <Box
+      sx={{
+        display: "flex",
+        flexDirection: "column",
+        justifyContent: "center",
+        alignItems: "center",
+      }}
+    >
+      <Typography variant="h5">
+        Countdown to Dranks:{" "}
+        <Typography variant="h4" sx={{ marginBottom: 0 }}>
+          <b>{seconds}</b>
+        </Typography>
+      </Typography>
+      <Button
+        onClick={startTimer}
+        variant="contained"
+        color="secondary"
+        disabled={timerStarted}
+      >
+        {timerStarted
+          ? "Get those creative juices flowin!!"
+          : "START ZE COUNTDOWN!"}
       </Button>
     </Box>
   );
