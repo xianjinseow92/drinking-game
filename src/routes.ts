@@ -14,12 +14,15 @@ const GameSelectPage = lazy(() => import("components/GameSelectPage"));
 const HigherOrLowerGameBoard = lazy(
   () => import("components/games/higher-or-lower/HigherOrLower.component")
 );
+const MindMeld = lazy(() => import("components/games/mind-meld/MindMeld.component"));
 
 // All Routes
 export const mainPage = "/drinking-game";
 const routes: IPath[] = [
   { name: mainPage, component: GameSelectPage },
-  { name: gameNames.higherOrLower, component: HigherOrLowerGameBoard }
+  { name: gameNames.higherOrLower, component: HigherOrLowerGameBoard },
+  { name: gameNames.mindMeld, component: MindMeld },
+
 ];
 
 const nonGameRoutes = [mainPage];
