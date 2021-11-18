@@ -39,6 +39,9 @@ function App() {
             <Redirect to={mainPage}/>
           </Route>
           {map(routes, renderRoute)}
+          <Route path="*">
+            <Redirect to={mainPage}/>
+          </Route>
         </Switch>
       </Suspense>
 
