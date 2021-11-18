@@ -35,9 +35,9 @@ function App() {
       <Suspense fallback={<LoadingSpinner />}>
         <Switch key={location.pathname}>
           {/* Redirect to main page on base url */}
-          <Route exact path="/">
+          {/* <Route exact path="/">
             <Redirect to={mainPage}/>
-          </Route>
+          </Route> */}
           {map(routes, renderRoute)}
           <Route path="*">
             <Redirect to={mainPage}/>
