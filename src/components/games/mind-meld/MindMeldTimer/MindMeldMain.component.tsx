@@ -32,7 +32,7 @@ const MindMeldMain = (props: any) => {
 
   return <>
     <MildMeldDisplay isWordSpitStage={isWordSpitStage}/>
-    <MindMeldTimer handleIsWordSpitStage={handleIsWordSpitStage}/>
+    <MindMeldTimer countdownSeconds={5} handleIsWordSpitStage={handleIsWordSpitStage}/>
   </>;
 };
 

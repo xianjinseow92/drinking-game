@@ -8,6 +8,8 @@ import Box from "@mui/material/Box";
 
 // Sound
 import ohMaGod from "assets/audio/ohmyGODD.mp3";
+import countingDown from "assets/audio/counting-down.mp3";
+import dingSound from "assets/audio/ding-ding-ding.mp3";
 
 /**
  * * A countdown timer that counts down from 3 to 0 after button is clicked each time.
@@ -23,9 +25,12 @@ const MindMeldTimer = (props: any) => {
   const { handleIsWordSpitStage, countdownSeconds = 3 } = props;
   const [seconds, setSeconds] = useState(countdownSeconds); // for updating displayed seconds and when to stop timer
   const [timerStarted, setTimerStarted] = useState(false); // control for starting and stopping the timer
-  const sound = new Howl({
-    src: [ohMaGod]
-  });
+  const [countingDownSound, setCountingDownSound] = useState(
+    new Howl({
+      src: [countingDown],
+      volume: 1.5
+    })
+  );
 
   // countdown timer logic
   useEffect(() => {
@@ -33,6 +38,7 @@ const MindMeldTimer = (props: any) => {
 
     // Countdown when timer has started
     if (timerStarted) {
+      countingDownSound.play();
       timer = setInterval(() => {
         setSeconds((prevSeconds: any) => prevSeconds - 1);
       }, 1000);
@@ -52,13 +58,17 @@ const MindMeldTimer = (props: any) => {
       // useEffect code runs again and sets another interval, therefore starting our countdown again
       // so we quickly clear the timer (interval) when the code runs again
       // to prevent countdown when
-      sound.play();
+      const endOfTimerSound = new Howl({
+        src: [dingSound],
+      });
+      countingDownSound.stop();
+      endOfTimerSound.play();
       setTimerStarted(false); // stop timer
       setSeconds(countdownSeconds); // set
     }
 
     return () => clearInterval(timer); // to clear interval when component unmounts
-  }, [seconds, countdownSeconds, timerStarted]);
+  }, [seconds, countdownSeconds, timerStarted, countingDownSound]);
 
   // Begins timer
   const startTimer = () => {

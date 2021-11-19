@@ -1,4 +1,8 @@
 import { useState } from "react";
+import { Howl } from "howler";
+
+// Audio
+import ohMaGawd from "assets/audio/ohmyGODD.mp3";
 
 // Layout
 import PageLayout from "layout/PageLayout.component";
@@ -15,6 +19,10 @@ const MeldMeld = (props: any) => {
   };
 
   const goToReadRules = () => {
+    const ohMaGodSound = new Howl({
+      src: [ohMaGawd]
+    });
+    ohMaGodSound.play();
     setMindMeldStarted(false);
   };
 
