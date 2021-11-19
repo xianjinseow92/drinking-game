@@ -7,8 +7,6 @@ import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
 // Sound
-import ohMaGod from "assets/audio/ohmyGODD.mp3";
-import countingDown from "assets/audio/counting-down.mp3";
 import dingSound from "assets/audio/ding-ding-ding.mp3";
 
 /**
@@ -22,15 +20,13 @@ import dingSound from "assets/audio/ding-ding-ding.mp3";
  * timerStarted is tagged to handling isWordSpitStage, diabling of button and text content of button
  */
 const MindMeldTimer = (props: any) => {
-  const { handleIsWordSpitStage, countdownSeconds = 3 } = props;
+  const {
+    handleIsWordSpitStage,
+    countdownSeconds = 3,
+    countingDownAudio, // counting down audio placed above this component to allow it to keep playing when timer mounts and unmounts
+  } = props;
   const [seconds, setSeconds] = useState(countdownSeconds); // for updating displayed seconds and when to stop timer
   const [timerStarted, setTimerStarted] = useState(false); // control for starting and stopping the timer
-  const [countingDownSound, setCountingDownSound] = useState(
-    new Howl({
-      src: [countingDown],
-      volume: 1.5
-    })
-  );
 
   // countdown timer logic
   useEffect(() => {
@@ -38,7 +34,7 @@ const MindMeldTimer = (props: any) => {
 
     // Countdown when timer has started
     if (timerStarted) {
-      countingDownSound.play();
+      countingDownAudio.play();
       timer = setInterval(() => {
         setSeconds((prevSeconds: any) => prevSeconds - 1);
       }, 1000);
@@ -61,14 +57,14 @@ const MindMeldTimer = (props: any) => {
       const endOfTimerSound = new Howl({
         src: [dingSound],
       });
-      countingDownSound.stop();
+      countingDownAudio.stop();
       endOfTimerSound.play();
       setTimerStarted(false); // stop timer
-      setSeconds(countdownSeconds); // set
+      setSeconds(countdownSeconds); // reset seconds back to OG
     }
 
     return () => clearInterval(timer); // to clear interval when component unmounts
-  }, [seconds, countdownSeconds, timerStarted, countingDownSound]);
+  }, [seconds, countdownSeconds, timerStarted, countingDownAudio]);
 
   // Begins timer
   const startTimer = () => {
