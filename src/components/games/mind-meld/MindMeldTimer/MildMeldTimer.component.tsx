@@ -1,9 +1,13 @@
 import { Typography } from "@mui/material";
 import { useState, useEffect } from "react";
+import { Howl } from "howler";
 
 // UI-Components
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
+
+// Sound
+import ohMaGod from "assets/audio/ohmyGODD.mp3";
 
 /**
  * * A countdown timer that counts down from 3 to 0 after button is clicked each time.
@@ -19,6 +23,9 @@ const MindMeldTimer = (props: any) => {
   const { handleIsWordSpitStage, countdownSeconds = 3 } = props;
   const [seconds, setSeconds] = useState(countdownSeconds); // for updating displayed seconds and when to stop timer
   const [timerStarted, setTimerStarted] = useState(false); // control for starting and stopping the timer
+  const sound = new Howl({
+    src: [ohMaGod]
+  });
 
   // countdown timer logic
   useEffect(() => {
@@ -45,6 +52,7 @@ const MindMeldTimer = (props: any) => {
       // useEffect code runs again and sets another interval, therefore starting our countdown again
       // so we quickly clear the timer (interval) when the code runs again
       // to prevent countdown when
+      sound.play();
       setTimerStarted(false); // stop timer
       setSeconds(countdownSeconds); // set
     }
