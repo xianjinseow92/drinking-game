@@ -20,7 +20,8 @@ const MeldMeld = (props: any) => {
 
   const goToReadRules = () => {
     const ohMaGodSound = new Howl({
-      src: [ohMaGawd]
+      src: [ohMaGawd],
+      html5: true
     });
     ohMaGodSound.play();
     setMindMeldStarted(false);

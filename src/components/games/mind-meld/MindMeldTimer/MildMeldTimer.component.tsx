@@ -56,6 +56,7 @@ const MindMeldTimer = (props: any) => {
       // to prevent countdown when
       const endOfTimerSound = new Howl({
         src: [dingSound],
+        html5: true
       });
       countingDownAudio.stop();
       endOfTimerSound.play();

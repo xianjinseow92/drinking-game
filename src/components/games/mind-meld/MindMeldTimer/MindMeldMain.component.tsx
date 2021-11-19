@@ -38,6 +38,7 @@ const MindMeldMain = (props: any) => {
   const [countingDownSound, setCountingDownSound] = useState(
     new Howl({
       src: [countingDown],
+      html5: true,
       volume: 1.5,
     })
   );
