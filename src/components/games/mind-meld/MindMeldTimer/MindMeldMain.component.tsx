@@ -39,7 +39,7 @@ const MindMeldMain = (props: any) => {
     new Howl({
       src: [countingDown],
       html5: true,
-      volume: 1.5,
+      volume: 1,
     })
   );
 
