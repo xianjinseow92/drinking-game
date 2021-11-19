@@ -13,7 +13,7 @@ const MildMeldRules = (props: any) => {
       </Typography>
 
       <Typography variant="subtitle1">
-        Players have to look at each other, count to 3, then say a word.
+        Players have to look at each other, count to 5, then say a word.
       </Typography>
 
       <Typography variant="subtitle1">
@@ -22,8 +22,8 @@ const MildMeldRules = (props: any) => {
       </Typography>
 
       <Typography variant="subtitle1">
-        For example, someone says <b>“ball”</b>and the other player says{" "}
-        <b>“dog”</b>, a resulting common word <b>could be</b> <b>“Fetch”</b>!
+        For example, someone says <b>“ball”</b> and the other player says{" "}
+        <b>“dog”</b>, a resulting common word could be <b>“Fetch”</b>!
       </Typography>
 
       <Typography variant="subtitle1">
