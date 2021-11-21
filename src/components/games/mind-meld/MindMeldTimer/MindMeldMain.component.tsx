@@ -33,8 +33,6 @@ const MindMeldMain = (props: any) => {
   };
 
   // Counting down sound put here instead to cut sound when go back to main games page
-  // Not put in counter because the counter basically mounts and unmounts each time 
-  // the timer seconds changes. So the sound only plays for the first second
   const [countingDownSound, setCountingDownSound] = useState(
     new Howl({
       src: [countingDown],
@@ -43,7 +41,7 @@ const MindMeldMain = (props: any) => {
     })
   );
 
-  // Stop sound from playing when component unmounts (when go back to main games page, or wtv)
+  // Stop sound from playing when mindmeld game is unmounted (when go back to main games page, or wtv)
   useEffect(() => {
     return () => {
       countingDownSound.stop();
@@ -55,7 +53,7 @@ const MindMeldMain = (props: any) => {
       <MildMeldDisplay isWordSpitStage={isWordSpitStage} />
       <MindMeldTimer
         countingDownAudio={countingDownSound}
-        countdownSeconds={5}
+        countdownSeconds={3}
         handleIsWordSpitStage={handleIsWordSpitStage}
       />
     </>

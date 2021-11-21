@@ -34,7 +34,6 @@ const MindMeldTimer = (props: any) => {
 
     // Countdown when timer has started
     if (timerStarted) {
-      countingDownAudio.play();
       timer = setInterval(() => {
         setSeconds((prevSeconds: any) => prevSeconds - 1);
       }, 1000);
@@ -69,6 +68,7 @@ const MindMeldTimer = (props: any) => {
 
   // Begins timer
   const startTimer = () => {
+    countingDownAudio.play();
     setTimerStarted(true);
   };
 
