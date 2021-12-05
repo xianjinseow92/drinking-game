@@ -57,6 +57,15 @@ let theme = createTheme({
           marginBottom: "20px"
         }
       }
+    },
+    MuiDrawer: {
+      styleOverrides: {
+        root: {
+          "& .MuiDrawer-paper": {
+            backgroundColor: "rgba(255, 255, 255, 0.3)"
+          }
+        }
+      }
     }
   },
 });
