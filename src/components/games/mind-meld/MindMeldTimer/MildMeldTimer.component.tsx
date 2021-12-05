@@ -6,6 +6,9 @@ import { Howl } from "howler";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
+// Custom Components
+import TimerChangeButtons from "./TimerChangeButtons";
+
 // Sound
 import dingSound from "assets/audio/ding-ding-ding.mp3";
 
@@ -22,7 +25,8 @@ import dingSound from "assets/audio/ding-ding-ding.mp3";
 const MindMeldTimer = (props: any) => {
   const {
     handleIsWordSpitStage,
-    countdownSeconds = 3,
+    countdownSeconds,
+    setCountdownSeconds,
     countingDownAudio, // counting down audio placed above this component to allow it to keep playing when timer mounts and unmounts
   } = props;
   const [seconds, setSeconds] = useState(countdownSeconds); // for updating displayed seconds and when to stop timer
@@ -55,7 +59,7 @@ const MindMeldTimer = (props: any) => {
       // to prevent countdown when
       const endOfTimerSound = new Howl({
         src: [dingSound],
-        html5: true
+        html5: true,
       });
       countingDownAudio.stop();
       endOfTimerSound.play();
@@ -65,6 +69,11 @@ const MindMeldTimer = (props: any) => {
 
     return () => clearInterval(timer); // to clear interval when component unmounts
   }, [seconds, countdownSeconds, timerStarted, countingDownAudio]);
+
+  // For when user decides to change the timer
+  useEffect(() => {
+    setSeconds(countdownSeconds);
+  }, [countdownSeconds]);
 
   // Begins timer
   const startTimer = () => {
@@ -86,6 +95,7 @@ const MindMeldTimer = (props: any) => {
         flexDirection: "column",
         justifyContent: "center",
         alignItems: "center",
+        width: "100%"
       }}
     >
       <Typography variant="h5">
@@ -104,6 +114,10 @@ const MindMeldTimer = (props: any) => {
           ? "Get those creative juices flowin!!"
           : "START ZE COUNTDOWN!"}
       </Button>
+      <TimerChangeButtons
+        timerStarted={timerStarted}
+        setCountdownSeconds={setCountdownSeconds}
+      />
     </Box>
   );
 };

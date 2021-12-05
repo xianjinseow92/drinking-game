@@ -32,6 +32,8 @@ const MindMeldMain = (props: any) => {
     setIsWordSpitStage(isWordSpitStage);
   };
 
+  const { countdownSeconds, setCountdownSeconds } = props;
+
   // Counting down sound put here instead to cut sound when go back to main games page
   const [countingDownSound, setCountingDownSound] = useState(
     new Howl({
@@ -53,7 +55,8 @@ const MindMeldMain = (props: any) => {
       <MildMeldDisplay isWordSpitStage={isWordSpitStage} />
       <MindMeldTimer
         countingDownAudio={countingDownSound}
-        countdownSeconds={3}
+        countdownSeconds={countdownSeconds}
+        setCountdownSeconds={setCountdownSeconds}
         handleIsWordSpitStage={handleIsWordSpitStage}
       />
     </>

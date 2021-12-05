@@ -5,7 +5,7 @@ import { Typography } from "@mui/material";
 import Button from "@mui/material/Button";
 
 const MildMeldRules = (props: any) => {
-  const { onStart } = props;
+  const { onStart, countdownSeconds } = props;
   return (
     <>
       <Typography variant="h1">
@@ -13,7 +13,8 @@ const MildMeldRules = (props: any) => {
       </Typography>
 
       <Typography variant="subtitle1">
-        Players have to look at each other, count to 5, then say a word.
+        Players have to look at each other, count to {countdownSeconds}, then
+        say a word.
       </Typography>
 
       <Typography variant="subtitle1">

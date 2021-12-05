@@ -8,10 +8,10 @@ import Button from "@mui/material/Button";
 import MindMeldMain from "./MindMeldTimer/MindMeldMain.component";
 
 const BeginMindMeld = (props: any) => {
-  const { onClick } = props;
+  const { onClick, countdownSeconds, setCountdownSeconds } = props;
   return (
     <>
-      <MindMeldMain />
+      <MindMeldMain countdownSeconds={countdownSeconds} setCountdownSeconds={setCountdownSeconds}/>
       <Button
         variant="contained"
         color="secondary"

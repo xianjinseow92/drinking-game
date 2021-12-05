@@ -13,6 +13,7 @@ import BeginMindMeld from "./BeginMindMeld.component";
 
 const MeldMeld = (props: any) => {
   const [mindMeldStarted, setMindMeldStarted] = useState(false);
+  const [countdownSeconds, setCountdownSeconds] = useState(5); // default countdown time is 5
 
   const startMindMeld = () => {
     setMindMeldStarted(true);
@@ -21,7 +22,7 @@ const MeldMeld = (props: any) => {
   const goToReadRules = () => {
     const ohMaGodSound = new Howl({
       src: [ohMaGawd],
-      html5: true
+      html5: true,
     });
     ohMaGodSound.play();
     setMindMeldStarted(false);
@@ -30,9 +31,16 @@ const MeldMeld = (props: any) => {
   return (
     <PageLayout>
       {mindMeldStarted ? (
-        <BeginMindMeld onClick={goToReadRules}/>
+        <BeginMindMeld
+          onClick={goToReadRules}
+          countdownSeconds={countdownSeconds}
+          setCountdownSeconds={setCountdownSeconds}
+        />
       ) : (
-        <MildMeldRules onStart={startMindMeld} />
+        <MildMeldRules
+          onStart={startMindMeld}
+          countdownSeconds={countdownSeconds}
+        />
       )}
     </PageLayout>
   );
