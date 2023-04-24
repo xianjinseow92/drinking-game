@@ -75,6 +75,25 @@ const HigherOrLowerGameBoard = (props: any) => {
   };
   return (
     <PageLayout sx={{}}>
+      {isFetchingCard && deck.remaining !== 0 && (
+        <Box
+          sx={{
+            display: "flex",
+            position: "absolute",
+            top: "10%",
+            left: "50%",
+            transform: "translateX(-50%)",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center"
+          }}
+        >
+          <BeatLoader size={20} color={theme.palette.secondary.main} margin={5} />
+          <Typography variant="h5">
+            {getRandomElementFromArray(randomFetchingMessages)}
+          </Typography>
+        </Box>
+      )}
       {/* Show nothing first if there are no cards in the deck */}
       {deck.cards[0] === undefined ? (
         // Placeholder to show nothing first
@@ -101,21 +120,16 @@ const HigherOrLowerGameBoard = (props: any) => {
       >
         {deck.remaining === 52 ? "Begin Game" : "Draw Card"}
       </Button>
-      <Button
-        variant="contained"
-        color="secondary"
-        onClick={reshuffleDeck}
-        sx={{ marginBottom: marginBottom }}
-      >
-        Reshuffle Deck
-      </Button>
-      <Typography variant="subtitle1">
-        Cards remaining: {deck.remaining}
-      </Typography>
-      {isFetchingCard && deck.remaining !== 0 && (
-        <Typography variant="subtitle1">
-          {getRandomElementFromArray(randomFetchingMessages)}
-        </Typography>
+      <Typography variant="h5">Cards remaining: {deck.remaining}</Typography>
+      {deck?.cards[0] !== undefined && (
+        <Button
+          variant="contained"
+          color="secondary"
+          onClick={reshuffleDeck}
+          sx={{ marginTop: "3rem" }}
+        >
+          Reshuffle Deck
+        </Button>
       )}
     </PageLayout>
   );
