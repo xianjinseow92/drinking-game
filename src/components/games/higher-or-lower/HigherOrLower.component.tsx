@@ -100,7 +100,7 @@ const HigherOrLowerGameBoard = (props: any) => {
         <div></div>
       ) : (
         <CardImage
-          cardStyles={{marginBottom: marginBottom}}
+          cardStyles={{ marginBottom: marginBottom }}
           src={deck.cards[0].image}
           alt={deck.cards[0].value}
           component="img"
