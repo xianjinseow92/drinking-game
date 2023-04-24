@@ -5,9 +5,11 @@ import PageLayout from "layout/PageLayout.component";
 
 // Common UI Components
 import Button from "@mui/material/Button";
+import Box from "@mui/material/Box";
 
 // CustomComponents
 import CardImage from "components/CardImage.component";
+import BeatLoader from "react-spinners/BeatLoader";
 
 // Typography
 import Typography from "@mui/material/Typography";
@@ -17,6 +19,9 @@ import { IDeck } from "types/types";
 
 // Helpers
 import { getRandomElementFromArray } from "helpers/helpers";
+
+// Styles
+import theme from "styles/theme";
 
 const HigherOrLowerGameBoard = (props: any) => {
   // Style-related
