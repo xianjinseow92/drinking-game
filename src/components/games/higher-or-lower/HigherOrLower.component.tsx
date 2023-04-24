@@ -63,7 +63,7 @@ const HigherOrLowerGameBoard = (props: any) => {
       });
   };
 
-  const reshuffleDeck = (event: any) => {
+  const reshuffleDeck = () => {
     setIsFetchingCard(true); // fetching card !! when fetched successfully set to false
     fetch(`https://deckofcardsapi.com/api/deck/${deck.deck_id}/shuffle/`)
       .then((res) => res.json())
