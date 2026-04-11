@@ -13,15 +13,32 @@ const sharedFaceStyles = {
   position: "absolute",
   inset: 0,
   borderRadius: "28px",
-  padding: { xs: "18px", md: "32px" },
+  padding: { xs: "18px", md: "30px" },
   display: "flex",
   flexDirection: "column",
-  justifyContent: "space-between",
-  alignItems: "center",
-  textAlign: "center",
+  justifyContent: "flex-start",
+  alignItems: "flex-start",
+  textAlign: "left",
+  gap: { xs: 1, md: 1.5 },
   backfaceVisibility: "hidden",
   WebkitBackfaceVisibility: "hidden",
 } as const;
+
+const getRuleParts = (rule: string) => {
+  const letterRuleMatch = rule.match(/^(Beginning with|Ending with) ([A-Z]+)$/);
+
+  if (letterRuleMatch) {
+    return {
+      lead: letterRuleMatch[1],
+      emphasis: letterRuleMatch[2],
+    };
+  }
+
+  return {
+    lead: rule,
+    emphasis: null,
+  };
+};
 
 const SplurtActiveCard = ({
   card,
@@ -29,6 +46,8 @@ const SplurtActiveCard = ({
   onFlipCard,
   isVisible,
 }: ISplurtActiveCardProps) => {
+  const ruleParts = getRuleParts(card.rule);
+
   return (
     <Box
       aria-label="Flip current Splurt card"
@@ -65,31 +84,23 @@ const SplurtActiveCard = ({
         <Box
           sx={{
             ...sharedFaceStyles,
-            border: "3px solid rgba(255,255,255,0.65)",
-            background:
-              "linear-gradient(180deg, rgba(255,255,255,0.98), rgba(255,244,234,0.92))",
-            color: "#3a134d",
+            border: "4px solid rgba(255, 241, 227, 0.98)",
+            background: "#ffbf8f",
+            color: "#5a145f",
           }}
         >
-          <Typography variant="overline" sx={{ letterSpacing: "0.2em", mb: 0 }}>
-            CATEGORY
-          </Typography>
           <Typography
             variant="h3"
             sx={{
               fontWeight: 800,
-              lineHeight: 1.1,
+              lineHeight: 1.02,
               mb: 0,
-              fontSize: { xs: "2.1rem", md: "3rem" },
+              fontSize: { xs: "2.05rem", md: "3.35rem" },
+              maxWidth: "100%",
+              marginTop: { xs: 0.5, md: 1 },
             }}
           >
             {card.category}
-          </Typography>
-          <Typography
-            variant="body1"
-            sx={{ maxWidth: 200, mb: 0, fontSize: { xs: "0.9rem", md: "1rem" } }}
-          >
-            Tap card to reveal the matching word rule.
           </Typography>
         </Box>
 
@@ -97,32 +108,38 @@ const SplurtActiveCard = ({
           sx={{
             ...sharedFaceStyles,
             transform: "rotateY(180deg)",
-            border: "3px solid rgba(255,255,255,0.4)",
-            background:
-              "linear-gradient(180deg, rgba(67, 16, 96, 0.96), rgba(223, 0, 121, 0.92))",
+            border: "4px solid rgba(255, 208, 154, 0.65)",
+            background: "#5e1766",
             color: "#fff7fb",
           }}
         >
-          <Typography variant="overline" sx={{ letterSpacing: "0.2em", mb: 0 }}>
-            RULE
-          </Typography>
           <Typography
-            variant="h3"
+            variant="h4"
             sx={{
-              fontWeight: 800,
-              lineHeight: 1.15,
+              fontWeight: 700,
+              lineHeight: 1.05,
               mb: 0,
-              fontSize: { xs: "2.1rem", md: "3rem" },
+              fontSize: { xs: "1.7rem", md: "2.65rem" },
+              maxWidth: "100%",
             }}
           >
-            {card.rule}
+            {ruleParts.lead}
           </Typography>
-          <Typography
-            variant="body1"
-            sx={{ maxWidth: 200, mb: 0, fontSize: { xs: "0.9rem", md: "1rem" } }}
-          >
-            Say a word that fits both sides, then tap again to flip back.
-          </Typography>
+          {ruleParts.emphasis ? (
+            <Typography
+              variant="h2"
+              sx={{
+                fontWeight: 800,
+                lineHeight: 1,
+                mb: 0,
+                fontSize: { xs: "5.1rem", md: "7.8rem" },
+                alignSelf: "center",
+                marginTop: { xs: 1, md: 2 },
+              }}
+            >
+              {ruleParts.emphasis}
+            </Typography>
+          ) : null}
         </Box>
       </Box>
     </Box>

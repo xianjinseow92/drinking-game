@@ -65,31 +65,36 @@ const Splurt = () => {
 
   const statusMessage = useMemo(() => {
     if (isDrawing) {
-      return "Drawing next card...";
+      return "Shuffling up a spicy one...";
     }
 
     if (activeCard) {
-      return "Flip the card if needed, then the fastest player claims it.";
+      return activeFace === "category"
+        ? `${playerNames.playerOne} and ${playerNames.playerTwo}, peek the prompt — tap for the twist.`
+        : `${playerNames.playerOne} and ${playerNames.playerTwo}, the twist is out — blurt away.`;
     }
 
     if (!remainingCards.length) {
       if (setAsideCards.length) {
-        return "Deck finished. Review the player piles and set-aside cards in View Cards.";
+        return `${playerNames.playerOne} and ${playerNames.playerTwo}, check the piles and the set-aside chaos.`;
       }
 
       if (wonPiles.playerOne.length === wonPiles.playerTwo.length) {
-        return "Deck finished. Tie game.";
+        return `${playerNames.playerOne} and ${playerNames.playerTwo} finish in a glorious tie.`;
       }
 
       return wonPiles.playerOne.length > wonPiles.playerTwo.length
-        ? "Deck finished. Player 1 leads."
-        : "Deck finished. Player 2 leads.";
+        ? `${playerNames.playerOne} takes the crown!`
+        : `${playerNames.playerTwo} takes the crown!`;
     }
 
-    return "Draw a card to start the round.";
+    return `${playerNames.playerOne}, ${playerNames.playerTwo} — draw a card and let the chaos begin.`;
   }, [
     activeCard,
+    activeFace,
     isDrawing,
+    playerNames.playerOne,
+    playerNames.playerTwo,
     remainingCards.length,
     setAsideCards.length,
     wonPiles.playerOne.length,
@@ -292,15 +297,16 @@ const Splurt = () => {
                 tabIndex={0}
                 aria-label={`Open ${playerNames.playerOne} cards`}
                 sx={{
-                  borderRadius: "18px",
-                  padding: { xs: 0.9, md: 1.4 },
+                  borderRadius: { xs: "16px", md: "18px" },
+                  padding: { xs: 0.55, md: 1.4 },
                   background: "#fff1dd",
                   border: "2px solid rgba(255, 154, 0, 0.45)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 14px 30px rgba(0,0,0,0.12)",
+                  minHeight: { xs: 78, md: 104 },
+                  boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
                   cursor: "pointer",
                 }}
                 onClick={() => {
@@ -327,12 +333,15 @@ const Splurt = () => {
                     fontWeight: 700,
                     lineHeight: 1.1,
                     color: "#3a134d",
-                    fontSize: { xs: "0.82rem", md: "0.95rem" },
+                    fontSize: { xs: "0.68rem", md: "0.95rem" },
                   }}
                 >
                   {playerNames.playerOne}
                 </Button>
-                <Typography variant="h5" sx={{ mb: 0 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ mb: 0, fontSize: { xs: "1.35rem", md: "1.9rem" } }}
+                >
                   {wonPiles.playerOne.length}
                 </Typography>
               </Box>
@@ -342,15 +351,16 @@ const Splurt = () => {
                 tabIndex={0}
                 aria-label="Open set aside cards"
                 sx={{
-                  borderRadius: "18px",
-                  padding: { xs: 0.9, md: 1.4 },
+                  borderRadius: { xs: "16px", md: "18px" },
+                  padding: { xs: 0.55, md: 1.4 },
                   background: "#f2eef6",
                   border: "2px solid rgba(58, 19, 77, 0.22)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 14px 30px rgba(0,0,0,0.12)",
+                  minHeight: { xs: 78, md: 104 },
+                  boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
                   cursor: "pointer",
                 }}
                 onClick={() => {
@@ -366,11 +376,18 @@ const Splurt = () => {
               >
                 <Typography
                   variant="overline"
-                  sx={{ letterSpacing: "0.18em", mb: 0 }}
+                  sx={{
+                    letterSpacing: { xs: "0.12em", md: "0.18em" },
+                    mb: 0,
+                    fontSize: { xs: "0.56rem", md: "0.75rem" },
+                  }}
                 >
                   Set Aside
                 </Typography>
-                <Typography variant="h5" sx={{ mb: 0 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ mb: 0, fontSize: { xs: "1.35rem", md: "1.9rem" } }}
+                >
                   {setAsideCards.length}
                 </Typography>
               </Box>
@@ -380,15 +397,16 @@ const Splurt = () => {
                 tabIndex={0}
                 aria-label={`Open ${playerNames.playerTwo} cards`}
                 sx={{
-                  borderRadius: "18px",
-                  padding: { xs: 0.9, md: 1.4 },
+                  borderRadius: { xs: "16px", md: "18px" },
+                  padding: { xs: 0.55, md: 1.4 },
                   background: "#fde7f7",
                   border: "2px solid rgba(198, 50, 172, 0.32)",
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
                   justifyContent: "center",
-                  boxShadow: "0 14px 30px rgba(0,0,0,0.12)",
+                  minHeight: { xs: 78, md: 104 },
+                  boxShadow: "0 12px 24px rgba(0,0,0,0.1)",
                   cursor: "pointer",
                 }}
                 onClick={() => {
@@ -415,12 +433,15 @@ const Splurt = () => {
                     fontWeight: 700,
                     lineHeight: 1.1,
                     color: "#3a134d",
-                    fontSize: { xs: "0.82rem", md: "0.95rem" },
+                    fontSize: { xs: "0.68rem", md: "0.95rem" },
                   }}
                 >
                   {playerNames.playerTwo}
                 </Button>
-                <Typography variant="h5" sx={{ mb: 0 }}>
+                <Typography
+                  variant="h5"
+                  sx={{ mb: 0, fontSize: { xs: "1.35rem", md: "1.9rem" } }}
+                >
                   {wonPiles.playerTwo.length}
                 </Typography>
               </Box>
@@ -434,6 +455,7 @@ const Splurt = () => {
               display: "flex",
               alignItems: "center",
               justifyContent: "center",
+              marginTop: { xs: 2.25, md: 1.5 },
             }}
           >
             {activeCard ? (
@@ -481,7 +503,11 @@ const Splurt = () => {
 
           <Box
             aria-live="polite"
-            sx={{ maxWidth: 700, paddingX: { xs: 1, md: 0 } }}
+            sx={{
+              maxWidth: 700,
+              paddingX: { xs: 1, md: 0 },
+              marginTop: { xs: 1.25, md: 1.5 },
+            }}
           >
             <Typography variant="body1" sx={{ mb: 0 }}>
               {statusMessage}
