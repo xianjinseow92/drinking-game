@@ -375,11 +375,13 @@ const Splurt = () => {
                 }}
               >
                 <Typography
-                  variant="overline"
+                  variant="body1"
                   sx={{
-                    letterSpacing: { xs: "0.12em", md: "0.18em" },
+                    fontWeight: 700,
+                    lineHeight: 1.1,
                     mb: 0,
-                    fontSize: { xs: "0.56rem", md: "0.75rem" },
+                    color: "#3a134d",
+                    fontSize: { xs: "0.68rem", md: "0.95rem" },
                   }}
                 >
                   Set Aside
@@ -467,6 +469,15 @@ const Splurt = () => {
               />
             ) : (
               <Box
+                role="button"
+                tabIndex={0}
+                aria-label="Draw next Splurt card"
+                onClick={handleDrawCard}
+                onKeyDown={(event: any) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    handleDrawCard();
+                  }
+                }}
                 sx={{
                   width: { xs: 216, sm: 320, md: 360 },
                   height: { xs: 252, sm: 430, md: 470 },
@@ -479,6 +490,7 @@ const Splurt = () => {
                   justifyContent: "center",
                   padding: 3,
                   boxShadow: "0 18px 40px rgba(0,0,0,0.12)",
+                  cursor: canDrawCard ? "pointer" : "default",
                 }}
               >
                 <Typography
