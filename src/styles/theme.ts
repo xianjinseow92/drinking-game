@@ -1,14 +1,5 @@
 import { createTheme, responsiveFontSizes } from "@mui/material/styles";
 
-const colorSchemeOne = {
-  primary: "#df0079",
-  complementary: "#00df64",
-  analogousOne: "#d400df",
-  analogusTwo: "#df000b",
-  triadicOne: "#df6400",
-  triadicTwo: "#7bdf00",
-};
-
 const colorSchemeTwo = {
   primary: "#df0079",
   secondary: "#ff5c01",

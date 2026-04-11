@@ -46,10 +46,11 @@ const GameSelectPage = (props: any) => {
       {/* All Buttons to Games */}
       {allGameRoutes.map((gameRoute) => (
         <Button
+          key={gameRoute.name}
           variant="contained"
           color="secondary"
           onClick={goToGame.bind(this, gameRoute.name)}
-          sx={{marginBottom: marginBottom}}
+          sx={{ marginBottom: marginBottom }}
         >
           {removeAllSlashes(cleanKebabString(gameRoute.name))}
         </Button>

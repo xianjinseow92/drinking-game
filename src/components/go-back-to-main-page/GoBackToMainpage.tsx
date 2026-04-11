@@ -6,9 +6,6 @@ import { useHistory } from "react-router";
 import Button from "@mui/material/Button";
 import Box from "@mui/material/Box";
 
-// Styles
-import { makeStyles } from "@mui/styles";
-
 /**
  * Serves to redirect users back to Game Select Page.
  * Will render if route name is !== "/drinking-game" (controleld via App Component)
@@ -18,26 +15,44 @@ import { makeStyles } from "@mui/styles";
 const GoBackToMainPage = (props: any) => {
     const history = useHistory();
 
-    // Component styles
-    const styles = makeStyles((theme: any) => ({
-        root: {
-            width: "100%",
-            position: "fixed",
-            bottom: "10px",
-            left: 0,
-            display: "flex",
-            justifyContent: "center"
-        }
-    }))();
-
     const returnToMainPage = () => {
         history.push(mainPage)
     };
 
     return (
-        <Box className={styles.root}>
-            <Button variant="contained" onClick={returnToMainPage} color="secondary">
-                Back to all games!
+        <Box
+            sx={{
+                width: "100%",
+                position: "fixed",
+                top: { xs: "calc(env(safe-area-inset-top, 0px) + 8px)", md: "auto" },
+                bottom: { xs: "auto", md: "10px" },
+                left: 0,
+                display: "flex",
+                justifyContent: { xs: "flex-start", md: "center" },
+                paddingX: { xs: 1, md: 0 },
+                zIndex: 10,
+                pointerEvents: "none"
+            }}
+        >
+            <Button
+                variant="contained"
+                onClick={returnToMainPage}
+                color="secondary"
+                sx={{
+                    pointerEvents: "auto",
+                    borderRadius: "999px",
+                    minHeight: { xs: 38, md: 48 },
+                    minWidth: { xs: 0, md: "auto" },
+                    paddingX: { xs: 1.5, md: 3 },
+                    fontSize: { xs: "0.72rem", md: "0.9rem" }
+                }}
+            >
+                <Box component="span" sx={{ display: { xs: "inline", md: "none" } }}>
+                    Back
+                </Box>
+                <Box component="span" sx={{ display: { xs: "none", md: "inline" } }}>
+                    Back to all games!
+                </Box>
             </Button>
         </Box>
     );

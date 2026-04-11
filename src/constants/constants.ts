@@ -1,4 +1,5 @@
 export const gameNames = {
     higherOrLower: "/higher-or-lower",
-    mindMeld: "/mind-meld"
+    mindMeld: "/mind-meld",
+    splurt: "/splurt"
 };

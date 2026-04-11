@@ -35,7 +35,7 @@ const MindMeldMain = (props: any) => {
   const { countdownSeconds, setCountdownSeconds } = props;
 
   // Counting down sound put here instead to cut sound when go back to main games page
-  const [countingDownSound, setCountingDownSound] = useState(
+  const [countingDownSound] = useState(
     new Howl({
       src: [countingDown],
       html5: true,
