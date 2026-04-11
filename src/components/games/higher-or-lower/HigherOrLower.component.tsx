@@ -80,25 +80,35 @@ const HigherOrLowerGameBoard = (props: any) => {
   };
   return (
     <PageLayout sx={{}}>
-      {isFetchingCard && deck.remaining !== 0 && (
-        <Box
-          sx={{
-            display: "flex",
-            position: "absolute",
-            top: "10%",
-            left: "50%",
-            transform: "translateX(-50%)",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center"
-          }}
-        >
-          <BeatLoader size={20} color={theme.palette.secondary.main} margin={5} />
-          <Typography variant="h5">
-            {getRandomElementFromArray(randomFetchingMessages)}
-          </Typography>
-        </Box>
-      )}
+      <Box
+        sx={{
+          minHeight: "60px",
+          display: "flex",
+          alignItems: "center",
+          justifyContent: "center",
+          marginBottom: marginBottom,
+        }}
+      >
+        {isFetchingCard && deck.remaining !== 0 && (
+          <Box
+            sx={{
+              display: "flex",
+              flexDirection: "column",
+              alignItems: "center",
+              justifyContent: "center",
+            }}
+          >
+            <BeatLoader
+              size={20}
+              color={theme.palette.secondary.main}
+              margin={5}
+            />
+            <Typography variant="h5">
+              {getRandomElementFromArray(randomFetchingMessages)}
+            </Typography>
+          </Box>
+        )}
+      </Box>
       {/* Show nothing first if there are no cards in the deck */}
       {deck.cards[0] === undefined ? (
         // Placeholder to show nothing first
