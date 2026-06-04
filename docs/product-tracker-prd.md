@@ -1,10 +1,14 @@
 # Product Tracker — Product Requirements Document (PRD)
 
-> **Status:** Draft v0.1 · **Owner:** @xianjinseow92 · **Last updated:** 2026-06-04
+> **Status:** Draft v0.2 · **Owner:** @xianjinseow92 · **Last updated:** 2026-06-04
 >
 > This is a living document. We're shaping it together — comments, edits, and
 > "no, I actually want X" are all expected. Nothing here is final until we agree
 > on the MVP scope (Section 12).
+>
+> **v0.2 changelog:** New dedicated repo confirmed · DB = **Supabase** · dashboard
+> **in MVP** · per-watch **configurable cadence** · added initial target sites
+> (Section 4a) and Shopify variant-aware adapter (Section 7).
 
 ---
 
@@ -63,12 +67,35 @@ what's watched.
 | **How the watchlist is managed** | **Web UI / dashboard** |
 | **Notifications** | **Telegram** (reuse `kukoedc-listener` bot token + chat ID) |
 
+**Resolved follow-ups:**
+- **Repo:** brand-new dedicated repo (e.g. `product-tracker`); port only the
+  Telegram credentials/snippet from `kukoedc-listener`.
+- **Database:** **Supabase** (managed Postgres + auto REST API + auth) — chosen
+  because it backs the dashboard with minimal backend code.
+- **Dashboard:** **in MVP** (not deferred).
+- **Cadence:** **configurable per watch** (see Section 11 for the cron pattern).
+
 ### The one tension to resolve
 GitHub Actions is *only the scheduled checker*. A **dashboard** needs (a) a place
 to be hosted and (b) a shared datastore that both the dashboard and the cron job
 can read/write. So the architecture introduces a small **hosted database** in the
 middle. This keeps "cron does the checking" and "UI manages the list" without
 forcing an always-on backend server. See Section 6.
+
+## 4a. Initial target sites
+
+All three day-one targets are **restock** watches; two are **variant-specific**.
+
+| Site | URL pattern | Platform (likely) | Watch | Extraction strategy |
+|---|---|---|---|---|
+| **qwertykeys.com** | `/products/<handle>` | **Shopify** | a specific **color** back in stock | `/<handle>.js` → match variant by option → `available` flips true |
+| **qwertyqop.com** | `/products/instock-...` | **Shopify** | a specific **kit** back in stock | same `.js` variant approach |
+| **s-craft.studio** | `/shop/in-stock/<product>` | **Squarespace / custom** | **Dreamy Umbreon** back in stock | verify `?format=json` or per-site adapter on sold-out/notify button |
+
+**Note:** these sites 403'd from this Claude session because the dev environment
+runs on a strict network **allowlist** — this does **not** affect the production
+tracker, which runs on GitHub Actions with open internet. Variant structures will
+be confirmed live on the first Actions run.
 
 ---
 
@@ -151,12 +178,20 @@ data + per-site overrides.
 
 A **watch** points at a product URL. Extraction is resolved in this order:
 
+0. **Shopify variant endpoint** (best path when the site is Shopify):
+   Fetch `/products/<handle>.js` (or `.json`) — a JSON document listing every
+   variant with an **`available: true/false`** boolean (and often
+   `inventory_quantity`). For variant-specific watches ("the *blue* one is back"),
+   match the variant by its option(s) and alert when `available` flips to true.
+   This is far more reliable than scraping HTML and covers 2 of the 3 day-one
+   targets (qwertykeys, qwertyqop).
 1. **Generic JSON-LD / microdata** (default, zero config):
    Parse `<script type="application/ld+json">` for a `Product` with `offers.price`
    and `offers.availability` (`InStock` / `OutOfStock`). Covers a large share of
-   Shopify, WooCommerce, and mainstream retail sites out of the box.
+   WooCommerce and mainstream retail sites out of the box.
 2. **Per-site config** (override when generic fails): a small entry keyed by
-   domain that specifies how to fetch and where to read the fields.
+   domain that specifies how to fetch and where to read the fields. (s-craft.studio
+   will likely use this, or its Squarespace `?format=json` view.)
 3. **Headless render** (opt-in per site): for JS-only pages, render with Playwright
    before extracting. Slower; used sparingly because it costs Actions minutes.
 
@@ -209,8 +244,12 @@ This is what makes it "easily configurable + scalable."
 ## 9. Data model (initial)
 
 ```
-sites           (id, domain, fetch_mode, config_json, created_at)
-watches         (id, url, name, site_id, target_price, alert_mode,
+sites           (id, domain, platform, fetch_mode, config_json, created_at)
+watches         (id, url, name, site_id,
+                 variant_match,            -- e.g. {"color":"Navy"} for variant watches
+                 target_price, alert_mode, -- price_change | restock | drop_below
+                 check_interval_minutes,   -- per-watch cadence
+                 last_checked_at,          -- drives "is this watch due?"
                  active, created_at)
 snapshots       (id, watch_id, price, currency, in_stock, raw_excerpt,
                  status, checked_at)         -- one row per check
@@ -219,6 +258,8 @@ notifications   (id, watch_id, type, payload, sent_at)
 - **Latest state** = most recent `snapshot` per `watch`.
 - **History** = all snapshots (powers the dashboard charts).
 - `status` distinguishes `ok` / `broken` / `blocked`.
+- `check_interval_minutes` + `last_checked_at` give **per-watch cadence**
+  (Section 11); `variant_match` powers variant-specific restock watches.
 
 ---
 
@@ -248,6 +289,12 @@ notifications   (id, watch_id, type, payload, sent_at)
   - **Shard** watches across parallel jobs if the list gets large.
   - Tiered cadence: hot items every 5–15 min, cold items hourly/daily.
   - Move heavy/headless sites to their own slower workflow.
+
+**Per-watch cadence on a single cron (the pattern):** GitHub Actions allows only
+one schedule per workflow. So we run the workflow at the **finest** interval we
+ever want (e.g. `*/5`), and the checker processes only watches that are **due** —
+i.e. `now - last_checked_at >= check_interval_minutes`. This yields true
+per-watch cadence (umbreon every 5 min, a low-priority item hourly) from one cron.
 
 ---
 
@@ -287,19 +334,20 @@ notifications   (id, watch_id, type, payload, sent_at)
 
 ---
 
-## 14. Open questions for you
+## 14. Decisions log (resolved)
 
-1. **Repo:** new dedicated repo (e.g. `product-tracker`), or evolve
-   `kukoedc-listener` into the general version? (I lean: **new repo**, port the
-   Telegram bits over.)
-2. **Database:** OK with **Supabase**, or prefer something else (Turso/SQLite,
-   plain Postgres, or even a JSON file in the repo for a barebones start)?
-3. **Check frequency:** what cadence do you want (every 15 min? hourly?), and are
-   any items time-sensitive enough to need 5-min checks?
-4. **Dashboard timing:** is the dashboard required for MVP, or fine to start with
-   a config/seed list and add the UI in Phase 3? (Faster to value if deferred.)
-5. **Initial sites:** which 2–3 sites do you want to support first? That tells me
-   whether generic JSON-LD is enough or we need adapters from day one.
-6. **Language/stack:** stick with **TypeScript** (matches your repos + lets the
-   checker and Next.js dashboard share code), or open to Python for scraping?
+1. ✅ **Repo:** new dedicated repo (`product-tracker`); port Telegram creds/snippet
+   from `kukoedc-listener`.
+2. ✅ **Database:** **Supabase**.
+3. ✅ **Check frequency:** **configurable per watch** (Section 11 pattern).
+4. ✅ **Dashboard:** **in MVP**.
+5. ✅ **Initial sites:** qwertykeys.com, qwertyqop.com, s-craft.studio (Section 4a) —
+   all restock watches, two variant-specific.
+6. **Language/stack:** proposed **TypeScript** (matches your repos; checker +
+   Next.js dashboard share types/code). _Confirm if happy._
+
+### Still open
+- Telegram: paste token + chat ID into the new repo's **GitHub Secrets**
+  (`TELEGRAM_BOT_TOKEN`, `TELEGRAM_CHAT_ID`) — never committed.
+- Finest cron interval to run at (drives minimum possible cadence): **5 min**?
 ```
