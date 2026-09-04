@@ -16,6 +16,12 @@ const HigherOrLowerGameBoard = lazy(
 );
 const MindMeld = lazy(() => import("components/games/mind-meld/MindMeld.component"));
 const Splurt = lazy(() => import("components/games/splurt/Splurt.component"));
+const WereNotReallyStrangers = lazy(
+  () =>
+    import(
+      "components/games/were-not-really-strangers/WereNotReallyStrangers.component"
+    )
+);
 
 // All Routes
 export const mainPage = "/drinking-game";
@@ -24,6 +30,11 @@ const routes: IPath[] = [
   { name: gameNames.higherOrLower, component: HigherOrLowerGameBoard },
   { name: gameNames.mindMeld, component: MindMeld },
   { name: gameNames.splurt, component: Splurt },
+  {
+    name: gameNames.wereNotReallyStrangers,
+    component: WereNotReallyStrangers,
+    label: "We're Not Really Strangers",
+  },
 ];
 
 const nonGameRoutes = [mainPage];

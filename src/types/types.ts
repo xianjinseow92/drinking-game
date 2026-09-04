@@ -16,4 +16,6 @@ export interface IDeck {
 export interface IPath {
   name: string;
   component: React.FC;
+  /** Optional menu label. Falls back to a cleaned-up version of `name`. */
+  label?: string;
 }

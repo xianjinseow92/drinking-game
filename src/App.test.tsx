@@ -25,3 +25,22 @@ test("renders the main game page and routes into Splurt", async () => {
     screen.getByRole("button", { name: /draw from splurt deck/i })
   ).toBeInTheDocument();
 });
+
+test("routes into We're Not Really Strangers from the main page", async () => {
+  render(
+    <MemoryRouter initialEntries={["/drinking-game"]}>
+      <App />
+    </MemoryRouter>
+  );
+
+  fireEvent.click(
+    await screen.findByRole("button", { name: /we're not really strangers/i })
+  );
+
+  expect(
+    await screen.findByRole("heading", { name: /we're not really strangers/i })
+  ).toBeInTheDocument();
+  expect(
+    screen.getByRole("button", { name: /start level 1: perception/i })
+  ).toBeInTheDocument();
+});

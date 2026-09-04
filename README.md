@@ -7,6 +7,7 @@ This repo is a collection of lightweight party and drinking games for the browse
 - Higher or Lower
 - Mind Meld
 - Splurt
+- We're Not Really Strangers
 
 The goal is simple:
 
