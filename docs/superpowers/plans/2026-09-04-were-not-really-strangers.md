@@ -16,5 +16,5 @@ watch it pass, commit.
       full flow (select → L1 → L2 → L3 → final → select).
 - [x] **Task 5 — Wiring.** constants, routes (with `label`), `IPath.label`,
       GameSelectPage, README; extend `App.test.tsx`.
-- [ ] **Task 6 — Verify.** `npm test -- --watchAll=false`, `npx tsc --noEmit`,
+- [x] **Task 6 — Verify.** `npm test -- --watchAll=false`, `npx tsc --noEmit`,
       `npm run build`; smoke the route in a headless browser.
