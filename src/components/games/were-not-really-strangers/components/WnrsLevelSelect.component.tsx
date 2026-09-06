@@ -6,6 +6,7 @@ import {
   TWnrsPlayer,
   TWnrsPlayerNames,
 } from "../types/wnrs.types";
+import { playerColors } from "../utils/wnrs.players";
 
 interface IWnrsLevelSelectProps {
   levels: IWnrsLevelMeta[];
@@ -30,16 +31,18 @@ const nameFieldStyles = {
   fontSize: "1rem",
   paddingX: 1.5,
   paddingY: 0.6,
-  border: "2px solid transparent",
-  "&.Mui-focused": { borderColor: "#ff9a00" },
+  border: "3px solid transparent",
+  "&.Mui-focused": { boxShadow: "0 0 0 3px rgba(255,255,255,0.5)" },
   "& input": { padding: 0 },
 } as const;
 
 const NameField = ({
+  player,
   label,
   value,
   onChange,
 }: {
+  player: TWnrsPlayer;
   label: string;
   value: string;
   onChange: (value: string) => void;
@@ -48,8 +51,26 @@ const NameField = ({
     <Typography
       component="label"
       variant="overline"
-      sx={{ mb: 0, lineHeight: 1.2, letterSpacing: "0.18em", textAlign: "left", opacity: 0.9 }}
+      sx={{
+        mb: 0,
+        lineHeight: 1.2,
+        letterSpacing: "0.18em",
+        textAlign: "left",
+        display: "flex",
+        alignItems: "center",
+        gap: 0.6,
+      }}
     >
+      <Box
+        component="span"
+        sx={{
+          width: 10,
+          height: 10,
+          borderRadius: "50%",
+          background: playerColors[player].bg,
+          flex: "0 0 auto",
+        }}
+      />
       {label}
     </Typography>
     <InputBase
@@ -57,7 +78,7 @@ const NameField = ({
       onChange={(event: any) => onChange(event.target.value)}
       onFocus={(event: any) => event.target.select()}
       inputProps={{ "aria-label": `${label} name`, maxLength: 16 }}
-      sx={nameFieldStyles}
+      sx={{ ...nameFieldStyles, borderColor: playerColors[player].bg }}
     />
   </Box>
 );
@@ -103,11 +124,13 @@ const WnrsLevelSelect = ({
         }}
       >
         <NameField
+          player="playerOne"
           label="Player 1"
           value={playerNames.playerOne}
           onChange={(value) => onPlayerNameChange("playerOne", value)}
         />
         <NameField
+          player="playerTwo"
           label="Player 2"
           value={playerNames.playerTwo}
           onChange={(value) => onPlayerNameChange("playerTwo", value)}

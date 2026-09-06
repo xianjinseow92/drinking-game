@@ -7,6 +7,8 @@ import {
   TWnrsPlayer,
   TWnrsPlayerNames,
 } from "../types/wnrs.types";
+import { playerColors } from "../utils/wnrs.players";
+import WnrsPlayerTag from "./WnrsPlayerTag.component";
 
 interface IWnrsHistoryDrawerProps {
   open: boolean;
@@ -14,6 +16,9 @@ interface IWnrsHistoryDrawerProps {
   history: IWnrsHistoryEntry[];
   playerNames: TWnrsPlayerNames;
 }
+
+type TOutcomeFilter = "all" | "skipped";
+type TPlayerFilter = "both" | TWnrsPlayer;
 
 export const countSips = (
   history: IWnrsHistoryEntry[]
@@ -29,18 +34,36 @@ export const countSips = (
   );
 };
 
+const filterChipStyles = (active: boolean, accent?: string) =>
+  ({
+    borderRadius: "999px",
+    minHeight: 36,
+    paddingX: 1.5,
+    textTransform: "none",
+    fontWeight: 700,
+    fontSize: "0.82rem",
+    color: "#3a134d",
+    background: active ? accent ?? "#ff5c01" : "rgba(58, 19, 77, 0.06)",
+    border: `1px solid ${active ? "transparent" : "rgba(58, 19, 77, 0.18)"}`,
+    "&:hover": { background: active ? accent ?? "#ff5c01" : "rgba(58, 19, 77, 0.12)" },
+    ...(active && !accent ? { color: "#fff7fb" } : {}),
+  }) as const;
+
 const WnrsHistoryDrawer = ({
   open,
   onClose,
   history,
   playerNames,
 }: IWnrsHistoryDrawerProps) => {
-  const [showSkippedOnly, setShowSkippedOnly] = useState(false);
+  const [outcomeFilter, setOutcomeFilter] = useState<TOutcomeFilter>("all");
+  const [playerFilter, setPlayerFilter] = useState<TPlayerFilter>("both");
+
   const sips = countSips(history);
   const skippedCount = history.filter((entry) => entry.outcome === "skipped").length;
-  const newestFirst = [...history]
+  const visible = [...history]
     .reverse()
-    .filter((entry) => !showSkippedOnly || entry.outcome === "skipped");
+    .filter((entry) => outcomeFilter === "all" || entry.outcome === "skipped")
+    .filter((entry) => playerFilter === "both" || entry.answerer === playerFilter);
 
   return (
     <Drawer
@@ -61,7 +84,7 @@ const WnrsHistoryDrawer = ({
           padding: { xs: 2.5, md: 4 },
           display: "flex",
           flexDirection: "column",
-          gap: 1.5,
+          gap: 1.25,
         }}
       >
         <Typography variant="h3" sx={{ mb: 0, fontSize: { xs: "2rem", md: "3rem" } }}>
@@ -80,15 +103,15 @@ const WnrsHistoryDrawer = ({
               key={player}
               sx={{
                 borderRadius: "16px",
-                padding: 1.5,
-                background: player === "playerOne" ? "#fff1dd" : "#fde7f7",
-                border: "1px solid rgba(58, 19, 77, 0.12)",
+                padding: 1.25,
+                background: playerColors[player].soft,
+                border: `2px solid ${playerColors[player].bg}`,
                 textAlign: "center",
               }}
             >
               <Typography
                 variant="body2"
-                sx={{ mb: 0, fontWeight: 700, lineHeight: 1.2 }}
+                sx={{ mb: 0.25, fontWeight: 800, lineHeight: 1.2 }}
               >
                 {playerNames[player]}
               </Typography>
@@ -103,27 +126,55 @@ const WnrsHistoryDrawer = ({
           ))}
         </Box>
 
-        <Box sx={{ display: "flex", gap: 1 }}>
-          <Button
-            size="small"
-            variant={showSkippedOnly ? "text" : "contained"}
-            color="secondary"
-            aria-pressed={!showSkippedOnly}
-            onClick={() => setShowSkippedOnly(false)}
-            sx={{ borderRadius: "999px", flex: 1, color: showSkippedOnly ? "#3a134d" : undefined }}
-          >
-            All ({history.length})
-          </Button>
-          <Button
-            size="small"
-            variant={showSkippedOnly ? "contained" : "text"}
-            color="secondary"
-            aria-pressed={showSkippedOnly}
-            onClick={() => setShowSkippedOnly(true)}
-            sx={{ borderRadius: "999px", flex: 1, color: showSkippedOnly ? undefined : "#3a134d" }}
-          >
-            Skipped ({skippedCount})
-          </Button>
+        <Box sx={{ display: "flex", flexDirection: "column", gap: 0.75 }}>
+          <Box sx={{ display: "flex", gap: 0.75, alignItems: "center" }}>
+            <Typography variant="overline" sx={{ mb: 0, letterSpacing: "0.14em", minWidth: 84, textAlign: "left" }}>
+              Answered by
+            </Typography>
+            <Button
+              aria-label="Show cards answered by anyone"
+              onClick={() => setPlayerFilter("both")}
+              sx={filterChipStyles(playerFilter === "both")}
+            >
+              Both
+            </Button>
+            {(["playerOne", "playerTwo"] as TWnrsPlayer[]).map((player) => (
+              <Button
+                key={player}
+                aria-label={`Show cards answered by ${playerNames[player]}`}
+                onClick={() => setPlayerFilter(player)}
+                sx={{
+                  ...filterChipStyles(playerFilter === player, playerColors[player].bg),
+                  maxWidth: 110,
+                  overflow: "hidden",
+                  textOverflow: "ellipsis",
+                  whiteSpace: "nowrap",
+                  display: "block",
+                }}
+              >
+                {playerNames[player]}
+              </Button>
+            ))}
+          </Box>
+          <Box sx={{ display: "flex", gap: 0.75, alignItems: "center" }}>
+            <Typography variant="overline" sx={{ mb: 0, letterSpacing: "0.14em", minWidth: 84, textAlign: "left" }}>
+              Show
+            </Typography>
+            <Button
+              aria-label="Show all cards"
+              onClick={() => setOutcomeFilter("all")}
+              sx={filterChipStyles(outcomeFilter === "all")}
+            >
+              All ({history.length})
+            </Button>
+            <Button
+              aria-label="Show skipped cards only"
+              onClick={() => setOutcomeFilter("skipped")}
+              sx={filterChipStyles(outcomeFilter === "skipped")}
+            >
+              Skipped ({skippedCount})
+            </Button>
+          </Box>
         </Box>
 
         <Box
@@ -136,8 +187,8 @@ const WnrsHistoryDrawer = ({
             paddingRight: 0.5,
           }}
         >
-          {newestFirst.length ? (
-            newestFirst.map((entry) => (
+          {visible.length ? (
+            visible.map((entry) => (
               <Box
                 key={entry.id}
                 data-testid="history-entry"
@@ -146,13 +197,14 @@ const WnrsHistoryDrawer = ({
                   padding: 1.75,
                   background: "#ffffff",
                   border: "1px solid rgba(58, 19, 77, 0.14)",
+                  borderLeft: `6px solid ${playerColors[entry.answerer].bg}`,
                   boxShadow: "0 10px 22px rgba(0,0,0,0.06)",
                   textAlign: "left",
                 }}
               >
                 <Typography
                   variant="overline"
-                  sx={{ mb: 0, letterSpacing: "0.14em", textAlign: "left", lineHeight: 1.6 }}
+                  sx={{ mb: 0.25, letterSpacing: "0.14em", textAlign: "left", lineHeight: 1.6, display: "block" }}
                 >
                   L{entry.level} · {entry.card.kind === "wildcard" ? "Wildcard" : "Card"} ·{" "}
                   {playerNames[entry.asker]} drew
@@ -160,24 +212,27 @@ const WnrsHistoryDrawer = ({
                 <Typography
                   variant="body1"
                   data-testid="history-card-text"
-                  sx={{ mb: 0.75, fontWeight: 600, lineHeight: 1.3, textAlign: "left" }}
+                  sx={{ mb: 0.9, fontWeight: 600, lineHeight: 1.3, textAlign: "left" }}
                 >
                   {entry.card.text}
                 </Typography>
-                <Typography
-                  variant="body2"
-                  sx={{
-                    mb: 0,
-                    textAlign: "left",
-                    color: entry.outcome === "skipped" ? "#b0004f" : "#3a134d",
-                    fontWeight: entry.outcome === "skipped" ? 700 : 400,
-                  }}
-                >
-                  {entry.outcome === "skipped"
-                    ? `${playerNames[entry.answerer]} skipped · sip`
-                    : `${playerNames[entry.answerer]} answered`}
-                  {entry.dugDeeper ? " · dug deeper" : ""}
-                </Typography>
+                <Box sx={{ display: "flex", alignItems: "center", gap: 0.75, flexWrap: "wrap" }}>
+                  <WnrsPlayerTag player={entry.answerer} name={playerNames[entry.answerer]} size="sm" />
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mb: 0,
+                      textAlign: "left",
+                      color: entry.outcome === "skipped" ? "#b0004f" : "#3a134d",
+                      fontWeight: entry.outcome === "skipped" ? 700 : 400,
+                    }}
+                  >
+                    {entry.outcome === "skipped"
+                      ? `${playerNames[entry.answerer]} skipped · sip`
+                      : `${playerNames[entry.answerer]} answered`}
+                    {entry.dugDeeper ? " · dug deeper" : ""}
+                  </Typography>
+                </Box>
               </Box>
             ))
           ) : (
@@ -190,7 +245,7 @@ const WnrsHistoryDrawer = ({
               }}
             >
               <Typography variant="body1" sx={{ mb: 0 }}>
-                {showSkippedOnly ? "No skips yet. Brave." : "Nothing yet. Draw a card."}
+                {history.length ? "Nothing matches that filter." : "Nothing yet. Draw a card."}
               </Typography>
             </Box>
           )}

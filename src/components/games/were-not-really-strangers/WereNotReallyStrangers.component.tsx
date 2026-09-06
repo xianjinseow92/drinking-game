@@ -1,6 +1,10 @@
 import { useEffect, useMemo, useState } from "react";
 
 import { Box, Button, Typography } from "@mui/material";
+import ArrowForwardRoundedIcon from "@mui/icons-material/ArrowForwardRounded";
+import GridViewRoundedIcon from "@mui/icons-material/GridViewRounded";
+import HelpOutlineRoundedIcon from "@mui/icons-material/HelpOutlineRounded";
+import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 
 import PageLayout from "layout/PageLayout.component";
 
@@ -10,6 +14,7 @@ import WnrsHistoryDrawer, {
 } from "./components/WnrsHistoryDrawer.component";
 import WnrsLevelSelect from "./components/WnrsLevelSelect.component";
 import WnrsLevelSummary from "./components/WnrsLevelSummary.component";
+import WnrsPlayerTag from "./components/WnrsPlayerTag.component";
 import WnrsRulesDrawer from "./components/WnrsRulesDrawer.component";
 import {
   WNRS_WILDCARDS_PER_LEVEL,
@@ -29,6 +34,7 @@ import {
   TWnrsPlayerFlags,
   TWnrsPlayerNames,
 } from "./types/wnrs.types";
+import { playerColors } from "./utils/wnrs.players";
 import { buildLevelDeck } from "./utils/wnrs.utils";
 
 const LAST_LEVEL: TWnrsLevel = 3;
@@ -46,14 +52,24 @@ const otherPlayer = (player: TWnrsPlayer): TWnrsPlayer =>
 const getLevelMeta = (level: TWnrsLevel) =>
   wnrsLevels.find((meta) => meta.level === level) ?? wnrsLevels[0];
 
-const textButtonStyles = {
+// Utility chips: bordered with an icon so they read as tappable on a flat
+// coloured background, but small and quiet next to the primary action.
+const chipButtonStyles = {
   color: "#fff7fb",
   borderRadius: "999px",
   minWidth: 0,
-  minHeight: 40,
-  paddingX: 1.1,
-  fontSize: { xs: "0.74rem", md: "0.85rem" },
+  minHeight: 38,
+  paddingX: 1.25,
+  paddingY: 0.4,
+  fontSize: { xs: "0.78rem", md: "0.85rem" },
+  fontWeight: 700,
   textTransform: "none",
+  border: "1.5px solid rgba(255,255,255,0.5)",
+  background: "rgba(255,255,255,0.12)",
+  gap: 0.6,
+  "& .MuiButton-startIcon": { marginRight: 0, marginLeft: 0 },
+  "& svg": { fontSize: 18 },
+  "&:hover": { background: "rgba(255,255,255,0.22)", borderColor: "#fff7fb" },
 } as const;
 
 const WereNotReallyStrangers = () => {
@@ -200,25 +216,20 @@ const WereNotReallyStrangers = () => {
     const askerName = playerNames[asker];
     const answererName = playerNames[answerer];
 
+    const askerTag = <WnrsPlayerTag player={asker} name={askerName} />;
+    const answererTag = <WnrsPlayerTag player={answerer} name={answererName} />;
+
     if (activeCard.kind === "wildcard") {
-      return (
-        <>
-          <b>{answererName}</b>, do what it says.
-        </>
-      );
+      return <>{answererTag}, do what it says.</>;
     }
 
     if (digDeeperActive) {
-      return (
-        <>
-          Dig deeper, <b>{answererName}</b>. One layer further.
-        </>
-      );
+      return <>Dig deeper, {answererTag}. One layer further.</>;
     }
 
     return (
       <>
-        <b>{askerName}</b> asks · <b>{answererName}</b> answers
+        {askerTag} asks · {answererTag} answers
       </>
     );
   }, [activeCard, answerer, asker, digDeeperActive, phase, playerNames]);
@@ -338,8 +349,9 @@ const WereNotReallyStrangers = () => {
                       paddingX: 1.25,
                       paddingY: 0.25,
                       borderRadius: "999px",
-                      background: "rgba(255,255,255,0.16)",
-                      fontWeight: 700,
+                      background: playerColors[asker].bg,
+                      color: playerColors[asker].text,
+                      fontWeight: 800,
                     }}
                   >
                     {playerNames[asker]} sips
@@ -385,15 +397,23 @@ const WereNotReallyStrangers = () => {
                     }}
                   >
                     <Button
-                      variant="text"
+                      variant="outlined"
                       aria-label="Skip this card and take a sip"
                       onClick={() => advance("skipped")}
                       sx={{
-                        minHeight: 44,
+                        minHeight: 48,
                         borderRadius: "999px",
-                        color: "rgba(255,247,251,0.85)",
+                        color: "#fff7fb",
+                        borderColor: "rgba(255,255,255,0.75)",
+                        borderWidth: 2,
                         textTransform: "none",
-                        fontSize: { xs: "0.9rem", md: "0.95rem" },
+                        fontWeight: 700,
+                        fontSize: { xs: "0.95rem", md: "1rem" },
+                        "&:hover": {
+                          borderWidth: 2,
+                          borderColor: "#fff7fb",
+                          background: "rgba(255,255,255,0.12)",
+                        },
                       }}
                     >
                       Skip (sip!)
@@ -404,12 +424,16 @@ const WereNotReallyStrangers = () => {
                       onClick={handleDigDeeper}
                       disabled={!canDigDeeper}
                       sx={{
-                        minHeight: 44,
+                        minHeight: 48,
                         borderRadius: "999px",
-                        color: "rgba(255,247,251,0.85)",
+                        color: "rgba(255,247,251,0.9)",
                         textTransform: "none",
+                        textDecoration: "underline",
+                        textDecorationColor: "rgba(255,247,251,0.45)",
+                        textUnderlineOffset: "4px",
                         fontSize: { xs: "0.9rem", md: "0.95rem" },
-                        "&.Mui-disabled": { color: "rgba(255,247,251,0.4)" },
+                        "&.Mui-disabled": { color: "rgba(255,247,251,0.4)", textDecoration: "none" },
+                        "&:hover": { textDecoration: "underline", background: "rgba(255,255,255,0.08)" },
                       }}
                     >
                       {digDeeperActive
@@ -443,44 +467,43 @@ const WereNotReallyStrangers = () => {
                   display: "flex",
                   flexWrap: "wrap",
                   justifyContent: "center",
-                  gap: { xs: 0.25, md: 1 },
-                  marginTop: { xs: 0.25, md: 0.5 },
-                  opacity: 0.75,
+                  gap: { xs: 0.6, md: 1 },
+                  marginTop: { xs: 0.5, md: 0.75 },
                 }}
               >
                 <Button
-                  variant="text"
                   aria-label="Open rules"
                   onClick={() => setIsRulesOpen(true)}
-                  sx={textButtonStyles}
+                  startIcon={<HelpOutlineRoundedIcon />}
+                  sx={chipButtonStyles}
                 >
                   Rules
                 </Button>
                 <Button
-                  variant="text"
                   aria-label="Open history"
                   onClick={() => setIsHistoryOpen(true)}
-                  sx={textButtonStyles}
+                  startIcon={<HistoryRoundedIcon />}
+                  sx={chipButtonStyles}
                 >
                   History
                 </Button>
                 {phase === "playing" && (
                   <>
                     <Button
-                      variant="text"
                       aria-label={
                         level >= LAST_LEVEL ? "Go to the final card" : `Go to level ${level + 1}`
                       }
                       onClick={goToNextLevel}
-                      sx={textButtonStyles}
+                      startIcon={<ArrowForwardRoundedIcon />}
+                      sx={chipButtonStyles}
                     >
-                      {level >= LAST_LEVEL ? "Final card" : `Level ${level + 1} →`}
+                      {level >= LAST_LEVEL ? "Final card" : `Level ${level + 1}`}
                     </Button>
                     <Button
-                      variant="text"
                       aria-label="Back to level select"
                       onClick={backToLevels}
-                      sx={textButtonStyles}
+                      startIcon={<GridViewRoundedIcon />}
+                      sx={chipButtonStyles}
                     >
                       Levels
                     </Button>

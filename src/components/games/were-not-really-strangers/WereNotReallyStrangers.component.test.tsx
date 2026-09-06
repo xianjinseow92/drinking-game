@@ -102,7 +102,7 @@ describe("WereNotReallyStrangers", () => {
     // The skipped-only filter shows just the skipped question, with its text.
     const skippedText =
       within(entries[0]).getByTestId("history-card-text").textContent ?? "";
-    fireEvent.click(screen.getByRole("button", { name: /skipped \(1\)/i }));
+    fireEvent.click(screen.getByRole("button", { name: /show skipped cards only/i }));
     const skippedOnly = screen.getAllByTestId("history-entry");
     expect(skippedOnly).toHaveLength(1);
     expect(within(skippedOnly[0]).getByText(/player 1 skipped · sip/i)).toBeInTheDocument();
