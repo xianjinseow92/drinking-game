@@ -48,17 +48,21 @@ const WnrsRulesDrawer = ({ open, onClose }: IWnrsRulesDrawerProps) => {
             Sit across from each other. Phones down, except this one.
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
-            Pick a level. Take turns reading the card out loud and answering.
-            Everyone answers every card.
+            <b>One of you draws and reads the card out loud. The other answers.</b>{" "}
+            Then you swap. The app tracks whose turn it is.
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
             Honesty is the whole game. Short answers are fine. Silence is fine.
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
-            <b>Skip a card, take a sip.</b> That's the only drinking rule.
+            <b>Skip a card, take a sip.</b> The person who was meant to answer drinks.
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
-            Wildcards are instructions, not questions. Do what the card says.
+            <b>Dig Deeper.</b> Once per level, the asker can push the answer one
+            layer further. Use it when the answer felt safe. Never required.
+          </Typography>
+          <Typography variant="body1" sx={{ mb: 0 }}>
+            <b>Wildcards</b> are instructions, not questions. The answerer does what it says.
           </Typography>
         </Box>
 
@@ -67,16 +71,17 @@ const WnrsRulesDrawer = ({ open, onClose }: IWnrsRulesDrawerProps) => {
             The Levels
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
-            <b>1 · Perception</b> — what you assume about each other.
+            <b>1 · Perception</b> — first impressions and what you assume about each other.
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
             <b>2 · Connection</b> — the stories underneath.
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
-            <b>3 · Reflection</b> — what tonight changed.
+            <b>3 · Reflection</b> — look back on the game you just played.
           </Typography>
           <Typography variant="body1" sx={{ mb: 0 }}>
-            After level 3, there's one final card. Don't skip that one.
+            Move up a level whenever you both feel ready. There's no minimum. After
+            level 3 there's one final card, and you both write a note.
           </Typography>
         </Box>
 

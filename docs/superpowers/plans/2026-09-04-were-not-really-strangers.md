@@ -18,3 +18,15 @@ watch it pass, commit.
       GameSelectPage, README; extend `App.test.tsx`.
 - [x] **Task 6 — Verify.** `npm test -- --watchAll=false`, `npx tsc --noEmit`,
       `npm run build`; smoke the route in a headless browser.
+
+## v2 — dating flow (2026-09-06)
+
+Owner review found the v1 rules wrong (everyone answered every card). Fixed
+to the official one-asks-one-answers flow and tuned for dating on mobile.
+
+- [x] Player names on level select; turn banner (asks → answers), roles swap per card.
+- [x] Dig Deeper: one per player per level, optional, resets per level.
+- [x] Next-level / final-card shortcut at any time (no 15-card minimum, by owner's call).
+- [x] History log: who drew, who answered/skipped, dig-deeper flag; skipped-only filter; per-player sip tallies.
+- [x] Level summary shows per-player sips. Final card asks both to write.
+- [x] Rules drawer rewritten; mobile spacing tightened.

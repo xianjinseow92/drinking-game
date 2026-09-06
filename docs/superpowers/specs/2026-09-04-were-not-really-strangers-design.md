@@ -45,105 +45,89 @@ in this implementation are **original** writing in the spirit of the format
 text). The route and title use the game's name because that is how the
 owner asked for it and how players will look for it.
 
-## 4. Game flow
+## 4. Game flow (dating-optimised, v2)
+
+Two players. **One draws and reads the card aloud; the other answers.** Roles
+swap after every card. The app tracks whose turn it is.
 
 ```
-Level select  ──▶  Level 1 (Perception)  ──▶  Level 2 (Connection)
-                     │                            │
-                     ▼                            ▼
-                Level 3 (Reflection)  ──▶  Final card  ──▶  Level select
+Level select (names)  ──▶  Level 1 ──▶ Level 2 ──▶ Level 3 ──▶ Final card ──▶ Level select
+                             ▲  "Next level" is available at any time; no minimum card count.
 ```
 
-1. **Level select.** Three big cards (1 · Perception, 2 · Connection,
-   3 · Reflection) with a one-line description each. Tapping one starts
-   that level. A **Rules** button opens the rules drawer.
-2. **Playing a level.** Header shows the level name and `N of M`. The deck
-   is a shuffled copy of the level's prompts with a few **wildcards**
-   spliced in at random positions (never first, never last). The active
-   card fills the screen; below it sit two pill buttons:
-   - **Next** — advance to the next card.
-   - **Skip (sip!)** — advance, but the status line reminds the answerer
-     to drink. Skipped cards are counted and shown in the summary.
-3. **Level complete.** When the deck runs out the game shows a short
-   level summary (cards answered, skips) with **Continue to Level N+1**
-   or, after Level 3, **Reveal final card**. A secondary **Back to levels**
-   button is always available.
-4. **Final card.** A single closing prompt on a distinct face. Buttons:
-   **Play again** (returns to level select).
+1. **Level select.** Two name fields (default "Player 1" / "Player 2") and
+   three big level cards. A **Rules** button opens the rules drawer.
+2. **Playing a level.** Header shows the level name and `N of M`. A **turn
+   banner** shows `Asks: <asker> → Answers: <answerer>`. The deck is a
+   shuffled copy of the level's prompts with wildcards spliced into interior
+   positions. Buttons:
+   - **Answered** — logs the card, swaps roles, advances.
+   - **Skip (sip!)** — the answerer sips; logged as a skip; swaps roles; advances.
+   - **Dig deeper** — the asker's one use per level. Optional, never forced.
+     Marks the card as dug deeper and shows a prompt; does not advance.
+   - **Level N+1 →** / **Final card** — jump up whenever both feel ready.
+   - **History** — opens the history drawer.
+   Wildcards: the answerer does what it says; roles still swap after.
+3. **Level complete** (deck exhausted). Summary with cards answered and per-
+   player sips, plus **Continue** / **History** / **Back to levels**.
+4. **Final card.** Both players write a note, swap, open after goodbye.
+   **Play again** returns to level select and clears history.
 
-The floating "Back to all games" button provided by `App.tsx` remains
-available on every screen.
+### Official rules honoured
+- One asks, one answers, alternate (official).
+- Dig Deeper once per player per level (official; here optional).
+- Wildcards interleaved; the answerer completes them (official).
+- Final card: both write a note, open after parting (official).
+- **Deliberate deviations:** no 15-card minimum per level (owner's call: let a
+  date escalate quickly); "skip a card, take a sip" house rule.
 
 ## 5. Data model
 
 ```ts
 export type TWnrsLevel = 1 | 2 | 3;
 export type TWnrsCardKind = "prompt" | "wildcard" | "final";
+export type TWnrsPlayer = "playerOne" | "playerTwo";
+export type TWnrsOutcome = "answered" | "skipped";
 
-export interface IWnrsCard {
-  id: string;            // e.g. "wnrs-l1-04", "wnrs-wild-02", "wnrs-final"
-  kind: TWnrsCardKind;
-  level: TWnrsLevel | null; // null for wildcards & final
-  text: string;
-}
-
-export interface IWnrsLevelMeta {
-  level: TWnrsLevel;
-  name: string;          // "Perception" | "Connection" | "Reflection"
-  tagline: string;       // one-line description on the level select card
+export interface IWnrsCard { id: string; kind: TWnrsCardKind; level: TWnrsLevel | null; text: string; }
+export interface IWnrsLevelMeta { level: TWnrsLevel; name: string; tagline: string; }
+export interface IWnrsHistoryEntry {
+  id: string; level: TWnrsLevel; card: IWnrsCard;
+  asker: TWnrsPlayer; answerer: TWnrsPlayer;
+  outcome: TWnrsOutcome; dugDeeper: boolean;
 }
 ```
-
-`data/wnrsCards.ts` exports `wnrsLevels`, `wnrsPromptsByLevel`,
-`wnrsWildcards`, `wnrsFinalCard`. Roughly 15 prompts per level and 8
-wildcards.
 
 ## 6. Deck building (pure, tested)
 
-`utils/wnrs.utils.ts`:
+Unchanged: `shuffleCards` (Fisher–Yates) and `buildLevelDeck` (wildcards
+never first/last, injectable random).
 
-- `shuffleCards(cards)` — Fisher–Yates, returns a new array.
-- `buildLevelDeck(prompts, wildcards, wildcardCount, random?)` — shuffles
-  prompts, picks `wildcardCount` distinct wildcards, and inserts them at
-  random interior positions (index ≥ 1 and < length) so a level never
-  opens or closes on a wildcard. Accepts an injectable `random` function so
-  tests are deterministic. If there are fewer than 2 prompts, wildcards are
-  appended rather than interleaved.
-
-## 7. State machine (in the main component)
+## 7. State machine
 
 ```
 phase: "select" | "playing" | "levelComplete" | "final"
-level: TWnrsLevel | null
-deck: IWnrsCard[]
-index: number
-skipped: number
-lastAction: "answered" | "skipped" | null   // drives the status line
+level, deck, index
+asker: TWnrsPlayer            // answerer = the other player
+digDeeperUsed: { playerOne, playerTwo }   // reset per level
+digDeeperActive: boolean      // until the next advance
+history: IWnrsHistoryEntry[]  // whole session; cleared on back-to-levels / play again
+names: { playerOne, playerTwo }
 ```
-
-Transitions: `select → playing` (choose level), `playing → playing`
-(next/skip while cards remain), `playing → levelComplete` (last card
-consumed), `levelComplete → playing` (next level), `levelComplete → final`
-(after level 3), `final → select`, and `* → select` via Back to levels.
 
 ## 8. UI / components
 
-Feature folder `src/components/games/were-not-really-strangers/`:
+- `WereNotReallyStrangers.component.tsx` — state + phases.
+- `components/WnrsLevelSelect` — names + level cards + Rules.
+- `components/WnrsActiveCard` — card face (prompt / wildcard / final).
+- `components/WnrsHistoryDrawer` — right drawer: per-player sip tallies,
+  All / Skipped-only filter, every card with who drew, who answered or
+  skipped, and whether Dig Deeper was used. Exports `countSips`.
+- `components/WnrsLevelSummary` — end-of-level panel with per-player sips.
+- `components/WnrsRulesDrawer` — left drawer.
 
-- `WereNotReallyStrangers.component.tsx` — owns state; renders the phase.
-- `components/WnrsLevelSelect.component.tsx` — level cards + Rules.
-- `components/WnrsActiveCard.component.tsx` — the card face. Prompt cards
-  are cream with dark plum text; wildcards are plum with cream text and a
-  "WILDCARD" eyebrow; the final card is orange-tinted with a "FINAL CARD"
-  eyebrow. Fades/slides in when the card changes (CSS transition, same
-  approach as Splurt).
-- `components/WnrsRulesDrawer.component.tsx` — left drawer, same styling
-  as Splurt's rules drawer.
-- `components/WnrsLevelSummary.component.tsx` — end-of-level panel.
-
-Accessibility: every interactive element has an `aria-label`; the status
-line is `aria-live="polite"`; the card face has `role="article"` and a
-heading for the level.
+Mobile-first: 390px wide is the design target; all primary buttons ≥ 44px
+tall, turn banner is a single compact row.
 
 ## 9. Wiring
 
@@ -158,9 +142,10 @@ heading for the level.
 
 - `utils/wnrs.utils.test.ts` — deck length, wildcard count, wildcards
   never first/last, all prompts present, determinism with injected random.
-- `WereNotReallyStrangers.component.test.tsx` — level select renders;
-  choosing Level 1 shows a card and `1 of N`; Next advances; Skip
-  increments the skip note; exhausting the deck shows the summary;
-  continuing through Level 3 reaches the final card; Play again returns to
-  level select.
+- `WereNotReallyStrangers.component.test.tsx` — level select with name
+  fields and rules; asker/answerer alternate with custom names; history
+  records who drew / answered / skipped with the skipped-only filter; Dig
+  Deeper is optional, once per player per level, resets on a new level;
+  next-level shortcut at any time and level 3 → final card → play again;
+  exhausting a level shows per-player sips; back-to-levels abandons.
 - `App.test.tsx` — add a routing assertion for the new menu button.

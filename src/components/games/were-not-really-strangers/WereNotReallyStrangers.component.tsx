@@ -5,6 +5,9 @@ import { Box, Button, Typography } from "@mui/material";
 import PageLayout from "layout/PageLayout.component";
 
 import WnrsActiveCard from "./components/WnrsActiveCard.component";
+import WnrsHistoryDrawer, {
+  countSips,
+} from "./components/WnrsHistoryDrawer.component";
 import WnrsLevelSelect from "./components/WnrsLevelSelect.component";
 import WnrsLevelSummary from "./components/WnrsLevelSummary.component";
 import WnrsRulesDrawer from "./components/WnrsRulesDrawer.component";
@@ -17,27 +20,64 @@ import {
 } from "./data/wnrsCards";
 import {
   IWnrsCard,
+  IWnrsHistoryEntry,
   TWnrsLastAction,
   TWnrsLevel,
+  TWnrsOutcome,
   TWnrsPhase,
+  TWnrsPlayer,
+  TWnrsPlayerFlags,
+  TWnrsPlayerNames,
 } from "./types/wnrs.types";
 import { buildLevelDeck } from "./utils/wnrs.utils";
 
 const LAST_LEVEL: TWnrsLevel = 3;
 
+export const defaultPlayerNames: TWnrsPlayerNames = {
+  playerOne: "Player 1",
+  playerTwo: "Player 2",
+};
+
+const noDigDeeperUsed: TWnrsPlayerFlags = { playerOne: false, playerTwo: false };
+
+const otherPlayer = (player: TWnrsPlayer): TWnrsPlayer =>
+  player === "playerOne" ? "playerTwo" : "playerOne";
+
 const getLevelMeta = (level: TWnrsLevel) =>
   wnrsLevels.find((meta) => meta.level === level) ?? wnrsLevels[0];
+
+const textButtonStyles = {
+  color: "#fff7fb",
+  borderRadius: "999px",
+  minWidth: 0,
+  paddingX: 1.25,
+  fontSize: { xs: "0.78rem", md: "0.875rem" },
+} as const;
 
 const WereNotReallyStrangers = () => {
   const [phase, setPhase] = useState<TWnrsPhase>("select");
   const [level, setLevel] = useState<TWnrsLevel>(1);
   const [deck, setDeck] = useState<IWnrsCard[]>([]);
   const [index, setIndex] = useState(0);
-  const [skipped, setSkipped] = useState(0);
+  const [asker, setAsker] = useState<TWnrsPlayer>("playerOne");
+  const [digDeeperUsed, setDigDeeperUsed] =
+    useState<TWnrsPlayerFlags>(noDigDeeperUsed);
+  const [digDeeperActive, setDigDeeperActive] = useState(false);
+  const [history, setHistory] = useState<IWnrsHistoryEntry[]>([]);
   const [lastAction, setLastAction] = useState<TWnrsLastAction>(null);
+  const [rawNames, setRawNames] = useState<TWnrsPlayerNames>(defaultPlayerNames);
   const [isRulesOpen, setIsRulesOpen] = useState(false);
+  const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCardVisible, setIsCardVisible] = useState(false);
 
+  const playerNames = useMemo<TWnrsPlayerNames>(
+    () => ({
+      playerOne: rawNames.playerOne.trim() || defaultPlayerNames.playerOne,
+      playerTwo: rawNames.playerTwo.trim() || defaultPlayerNames.playerTwo,
+    }),
+    [rawNames.playerOne, rawNames.playerTwo]
+  );
+  const answerer = otherPlayer(asker);
   const levelMeta = getLevelMeta(level);
   const activeCard: IWnrsCard | null =
     phase === "playing"
@@ -45,9 +85,11 @@ const WereNotReallyStrangers = () => {
       : phase === "final"
         ? wnrsFinalCard
         : null;
+  const levelHistory = history.filter((entry) => entry.level === level);
+  const levelSips = countSips(levelHistory);
 
-  // Fade each new card in. The key is the card id so re-renders of the
-  // same card don't restart the animation.
+  // Fade each new card in. Keyed on the card id so re-renders of the same
+  // card don't restart the animation.
   useEffect(() => {
     if (!activeCard) {
       setIsCardVisible(false);
@@ -72,20 +114,32 @@ const WereNotReallyStrangers = () => {
       )
     );
     setIndex(0);
-    setSkipped(0);
+    setDigDeeperUsed(noDigDeeperUsed);
+    setDigDeeperActive(false);
     setLastAction(null);
     setPhase("playing");
   };
 
-  const advance = (action: Exclude<TWnrsLastAction, null>) => {
+  const advance = (outcome: TWnrsOutcome) => {
     if (phase !== "playing" || !activeCard) {
       return;
     }
 
-    if (action === "skipped") {
-      setSkipped((current) => current + 1);
-    }
-    setLastAction(action);
+    setHistory((current) => [
+      ...current,
+      {
+        id: `${level}-${activeCard.id}-${current.length + 1}`,
+        level,
+        card: activeCard,
+        asker,
+        answerer,
+        outcome,
+        dugDeeper: digDeeperActive,
+      },
+    ]);
+    setLastAction(outcome);
+    setDigDeeperActive(false);
+    setAsker(answerer);
 
     if (index + 1 >= deck.length) {
       setPhase("levelComplete");
@@ -95,9 +149,22 @@ const WereNotReallyStrangers = () => {
     setIndex(index + 1);
   };
 
-  const handleContinue = () => {
+  const handleDigDeeper = () => {
+    if (phase !== "playing" || !activeCard || activeCard.kind === "wildcard") {
+      return;
+    }
+    if (digDeeperUsed[asker] || digDeeperActive) {
+      return;
+    }
+
+    setDigDeeperUsed((current) => ({ ...current, [asker]: true }));
+    setDigDeeperActive(true);
+  };
+
+  const goToNextLevel = () => {
     if (level >= LAST_LEVEL) {
       setPhase("final");
+      setDigDeeperActive(false);
       return;
     }
 
@@ -108,33 +175,39 @@ const WereNotReallyStrangers = () => {
     setPhase("select");
     setDeck([]);
     setIndex(0);
-    setSkipped(0);
+    setAsker("playerOne");
+    setDigDeeperUsed(noDigDeeperUsed);
+    setDigDeeperActive(false);
+    setHistory([]);
     setLastAction(null);
   };
 
   const statusMessage = useMemo(() => {
     if (phase === "final") {
-      return "Take your time with this one. There's no skipping the last card.";
+      return "Both of you write. Swap notes. Don't open them until you've said goodbye.";
     }
 
     if (phase !== "playing" || !activeCard) {
       return "";
     }
 
+    const askerName = playerNames[asker];
+    const answererName = playerNames[answerer];
+
     if (activeCard.kind === "wildcard") {
-      return "Wildcard. Do what it says, no questions asked.";
+      return `Wildcard. ${answererName}, do what it says.`;
+    }
+
+    if (digDeeperActive) {
+      return `Dig deeper, ${answererName}. One layer further.`;
     }
 
     if (lastAction === "skipped") {
-      return "Skipped. Take a sip, then read this one out loud.";
+      return `Sip for the skip. ${askerName} reads this one, ${answererName} answers.`;
     }
 
-    if (lastAction === "answered") {
-      return "Nice. Next one, read it out loud.";
-    }
-
-    return "Read it out loud. Everyone answers.";
-  }, [activeCard, lastAction, phase]);
+    return `${askerName} reads it out loud. ${answererName} answers.`;
+  }, [activeCard, answerer, asker, digDeeperActive, lastAction, phase, playerNames]);
 
   const eyebrow =
     activeCard?.kind === "wildcard"
@@ -143,27 +216,41 @@ const WereNotReallyStrangers = () => {
         ? "Final card"
         : `Level ${level} · ${levelMeta.name}`;
 
+  const canDigDeeper =
+    phase === "playing" &&
+    activeCard?.kind === "prompt" &&
+    !digDeeperUsed[asker] &&
+    !digDeeperActive;
+
   return (
     <>
       <PageLayout
-        sx={{ paddingTop: { xs: 2, md: 3 }, paddingBottom: { xs: 2, md: 3 } }}
+        sx={{
+          paddingTop: { xs: 1.5, md: 3 },
+          paddingBottom: { xs: 1.5, md: 3 },
+          paddingX: { xs: 1.25, md: 3 },
+        }}
       >
         <Box
           sx={{
             width: "100%",
-            minHeight: { xs: "88vh", md: "84vh" },
+            minHeight: { xs: "90vh", md: "84vh" },
             display: "flex",
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: { xs: 1.5, md: 2 },
+            gap: { xs: 1.1, md: 2 },
             paddingTop: { xs: 5.5, md: 0 },
-            paddingBottom: { xs: 2, md: 8 },
+            paddingBottom: { xs: 1, md: 8 },
           }}
         >
           {phase === "select" && (
             <WnrsLevelSelect
               levels={wnrsLevels}
+              playerNames={rawNames}
+              onPlayerNameChange={(player, value) =>
+                setRawNames((current) => ({ ...current, [player]: value }))
+              }
               onSelectLevel={startLevel}
               onOpenRules={() => setIsRulesOpen(true)}
             />
@@ -179,13 +266,12 @@ const WereNotReallyStrangers = () => {
                   alignItems: "center",
                   justifyContent: "space-between",
                   gap: 1,
-                  paddingX: { xs: 1, md: 0 },
                 }}
               >
                 <Typography
                   variant="h6"
                   component="h2"
-                  sx={{ mb: 0, textAlign: "left" }}
+                  sx={{ mb: 0, textAlign: "left", fontSize: { xs: "1.05rem", md: "1.25rem" } }}
                 >
                   {phase === "final"
                     ? "The final card"
@@ -193,7 +279,7 @@ const WereNotReallyStrangers = () => {
                 </Typography>
                 {phase === "playing" && (
                   <Typography
-                    variant="body1"
+                    variant="body2"
                     sx={{ mb: 0, whiteSpace: "nowrap" }}
                     aria-label="Card progress"
                   >
@@ -202,6 +288,56 @@ const WereNotReallyStrangers = () => {
                 )}
               </Box>
 
+              {phase === "playing" && (
+                <Box
+                  aria-label="Turn"
+                  sx={{
+                    width: "100%",
+                    maxWidth: 560,
+                    display: "grid",
+                    gridTemplateColumns: "1fr auto 1fr",
+                    alignItems: "center",
+                    gap: 0.75,
+                    borderRadius: "16px",
+                    padding: { xs: "8px 12px", md: "10px 16px" },
+                    background: "rgba(255,255,255,0.14)",
+                    border: "1px solid rgba(255,255,255,0.35)",
+                  }}
+                >
+                  <Box sx={{ textAlign: "left", minWidth: 0 }}>
+                    <Typography
+                      variant="overline"
+                      sx={{ mb: 0, lineHeight: 1.2, letterSpacing: "0.16em", opacity: 0.85, display: "block", textAlign: "left" }}
+                    >
+                      Asks
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ mb: 0, fontWeight: 800, textAlign: "left", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                    >
+                      {playerNames[asker]}
+                    </Typography>
+                  </Box>
+                  <Typography variant="h5" sx={{ mb: 0, opacity: 0.7 }}>
+                    →
+                  </Typography>
+                  <Box sx={{ textAlign: "right", minWidth: 0 }}>
+                    <Typography
+                      variant="overline"
+                      sx={{ mb: 0, lineHeight: 1.2, letterSpacing: "0.16em", opacity: 0.85, display: "block", textAlign: "right" }}
+                    >
+                      Answers
+                    </Typography>
+                    <Typography
+                      variant="body1"
+                      sx={{ mb: 0, fontWeight: 800, textAlign: "right", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
+                    >
+                      {playerNames[answerer]}
+                    </Typography>
+                  </Box>
+                </Box>
+              )}
+
               <WnrsActiveCard
                 key={activeCard.id}
                 card={activeCard}
@@ -209,11 +345,11 @@ const WereNotReallyStrangers = () => {
                 isVisible={isCardVisible}
               />
 
-              <Box
-                aria-live="polite"
-                sx={{ maxWidth: 560, paddingX: { xs: 1, md: 0 } }}
-              >
-                <Typography variant="body1" sx={{ mb: 0 }}>
+              <Box aria-live="polite" sx={{ maxWidth: 560 }}>
+                <Typography
+                  variant="body1"
+                  sx={{ mb: 0, fontSize: { xs: "0.92rem", md: "1rem" } }}
+                >
                   {statusMessage}
                 </Typography>
               </Box>
@@ -223,37 +359,73 @@ const WereNotReallyStrangers = () => {
                   sx={{
                     width: "100%",
                     maxWidth: 560,
-                    display: "grid",
-                    gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                    gap: { xs: 1, md: 1.25 },
-                    paddingX: { xs: 1, md: 0 },
+                    display: "flex",
+                    flexDirection: "column",
+                    gap: { xs: 0.9, md: 1.25 },
                   }}
                 >
+                  <Box
+                    sx={{
+                      display: "grid",
+                      gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
+                      gap: { xs: 0.9, md: 1.25 },
+                    }}
+                  >
+                    <Button
+                      variant="outlined"
+                      aria-label="Skip this card and take a sip"
+                      onClick={() => advance("skipped")}
+                      sx={{
+                        minHeight: { xs: 54, md: 52 },
+                        borderRadius: "999px",
+                        color: "#fff7fb",
+                        borderColor: "rgba(255,255,255,0.7)",
+                        "&:hover": {
+                          borderColor: "#fff7fb",
+                          background: "rgba(255,255,255,0.1)",
+                        },
+                      }}
+                    >
+                      Skip (sip!)
+                    </Button>
+                    <Button
+                      variant="contained"
+                      color="secondary"
+                      aria-label="Answered, next card"
+                      onClick={() => advance("answered")}
+                      sx={{ minHeight: { xs: 54, md: 52 }, borderRadius: "999px" }}
+                    >
+                      Answered
+                    </Button>
+                  </Box>
+
                   <Button
                     variant="outlined"
-                    aria-label="Skip this card and take a sip"
-                    onClick={() => advance("skipped")}
+                    aria-label={`Dig deeper, ${playerNames[asker]}'s one use this level`}
+                    onClick={handleDigDeeper}
+                    disabled={!canDigDeeper}
                     sx={{
-                      minHeight: { xs: 56, md: 52 },
+                      minHeight: { xs: 44, md: 46 },
                       borderRadius: "999px",
                       color: "#fff7fb",
-                      borderColor: "rgba(255,255,255,0.7)",
+                      borderColor: "rgba(255,255,255,0.45)",
+                      textTransform: "none",
+                      fontSize: { xs: "0.82rem", md: "0.9rem" },
+                      "&.Mui-disabled": {
+                        color: "rgba(255,247,251,0.45)",
+                        borderColor: "rgba(255,255,255,0.2)",
+                      },
                       "&:hover": {
                         borderColor: "#fff7fb",
                         background: "rgba(255,255,255,0.1)",
                       },
                     }}
                   >
-                    Skip (sip!)
-                  </Button>
-                  <Button
-                    variant="contained"
-                    color="secondary"
-                    aria-label="Next card"
-                    onClick={() => advance("answered")}
-                    sx={{ minHeight: { xs: 56, md: 52 }, borderRadius: "999px" }}
-                  >
-                    Next
+                    {digDeeperActive
+                      ? "Digging deeper…"
+                      : digDeeperUsed[asker]
+                        ? `Dig deeper · ${playerNames[asker]} used it this level`
+                        : `Dig deeper · ${playerNames[asker]} has 1 left`}
                   </Button>
                 </Box>
               ) : (
@@ -263,7 +435,7 @@ const WereNotReallyStrangers = () => {
                   aria-label="Play again"
                   onClick={backToLevels}
                   sx={{
-                    minHeight: { xs: 56, md: 52 },
+                    minHeight: { xs: 54, md: 52 },
                     borderRadius: "999px",
                     minWidth: 200,
                   }}
@@ -272,24 +444,51 @@ const WereNotReallyStrangers = () => {
                 </Button>
               )}
 
-              <Box sx={{ display: "flex", gap: 1 }}>
+              <Box
+                sx={{
+                  display: "flex",
+                  flexWrap: "wrap",
+                  justifyContent: "center",
+                  gap: { xs: 0.25, md: 1 },
+                }}
+              >
                 <Button
                   variant="text"
                   aria-label="Open rules"
                   onClick={() => setIsRulesOpen(true)}
-                  sx={{ color: "#fff7fb", borderRadius: "999px" }}
+                  sx={textButtonStyles}
                 >
                   Rules
                 </Button>
+                <Button
+                  variant="text"
+                  aria-label="Open history"
+                  onClick={() => setIsHistoryOpen(true)}
+                  sx={textButtonStyles}
+                >
+                  History
+                </Button>
                 {phase === "playing" && (
-                  <Button
-                    variant="text"
-                    aria-label="Back to level select"
-                    onClick={backToLevels}
-                    sx={{ color: "#fff7fb", borderRadius: "999px" }}
-                  >
-                    Back to levels
-                  </Button>
+                  <>
+                    <Button
+                      variant="text"
+                      aria-label={
+                        level >= LAST_LEVEL ? "Go to the final card" : `Go to level ${level + 1}`
+                      }
+                      onClick={goToNextLevel}
+                      sx={textButtonStyles}
+                    >
+                      {level >= LAST_LEVEL ? "Final card" : `Level ${level + 1} →`}
+                    </Button>
+                    <Button
+                      variant="text"
+                      aria-label="Back to level select"
+                      onClick={backToLevels}
+                      sx={textButtonStyles}
+                    >
+                      Levels
+                    </Button>
+                  </>
                 )}
               </Box>
             </>
@@ -298,10 +497,12 @@ const WereNotReallyStrangers = () => {
           {phase === "levelComplete" && (
             <WnrsLevelSummary
               levelMeta={levelMeta}
-              answered={deck.length - skipped}
-              skipped={skipped}
+              answered={levelHistory.filter((entry) => entry.outcome === "answered").length}
+              sips={levelSips}
+              playerNames={playerNames}
               isLastLevel={level >= LAST_LEVEL}
-              onContinue={handleContinue}
+              onContinue={goToNextLevel}
+              onOpenHistory={() => setIsHistoryOpen(true)}
               onBackToLevels={backToLevels}
             />
           )}
@@ -309,6 +510,12 @@ const WereNotReallyStrangers = () => {
       </PageLayout>
 
       <WnrsRulesDrawer open={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
+      <WnrsHistoryDrawer
+        open={isHistoryOpen}
+        onClose={() => setIsHistoryOpen(false)}
+        history={history}
+        playerNames={playerNames}
+      />
     </>
   );
 };

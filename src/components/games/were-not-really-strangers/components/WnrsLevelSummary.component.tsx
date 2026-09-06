@@ -1,30 +1,37 @@
 import { Box, Button, Typography } from "@mui/material";
 
-import { IWnrsLevelMeta } from "../types/wnrs.types";
+import {
+  IWnrsLevelMeta,
+  TWnrsPlayer,
+  TWnrsPlayerNames,
+} from "../types/wnrs.types";
 
 interface IWnrsLevelSummaryProps {
   levelMeta: IWnrsLevelMeta;
   answered: number;
-  skipped: number;
+  sips: Record<TWnrsPlayer, number>;
+  playerNames: TWnrsPlayerNames;
   isLastLevel: boolean;
   onContinue: () => void;
+  onOpenHistory: () => void;
   onBackToLevels: () => void;
 }
 
 const WnrsLevelSummary = ({
   levelMeta,
   answered,
-  skipped,
+  sips,
+  playerNames,
   isLastLevel,
   onContinue,
+  onOpenHistory,
   onBackToLevels,
 }: IWnrsLevelSummaryProps) => {
-  const skipLine =
-    skipped === 0
+  const totalSips = sips.playerOne + sips.playerTwo;
+  const sipLine =
+    totalSips === 0
       ? "No skips. Not a single sip owed."
-      : skipped === 1
-        ? "1 card skipped. That's one sip owed."
-        : `${skipped} cards skipped. That's ${skipped} sips owed.`;
+      : `${playerNames.playerOne}: ${sips.playerOne} · ${playerNames.playerTwo}: ${sips.playerTwo} sips owed.`;
 
   return (
     <Box
@@ -51,7 +58,7 @@ const WnrsLevelSummary = ({
         {answered === 1 ? "1 card answered." : `${answered} cards answered.`}
       </Typography>
       <Typography variant="body1" sx={{ mb: 0 }}>
-        {skipLine}
+        {sipLine}
       </Typography>
 
       <Box
@@ -72,13 +79,23 @@ const WnrsLevelSummary = ({
             ? "Reveal the final card"
             : `Continue to level ${levelMeta.level + 1}`}
         </Button>
-        <Button
-          variant="text"
-          onClick={onBackToLevels}
-          sx={{ borderRadius: "999px", color: "#3a134d" }}
-        >
-          Back to levels
-        </Button>
+        <Box sx={{ display: "flex", gap: 1, justifyContent: "center" }}>
+          <Button
+            variant="text"
+            aria-label="Open history"
+            onClick={onOpenHistory}
+            sx={{ borderRadius: "999px", color: "#3a134d" }}
+          >
+            History
+          </Button>
+          <Button
+            variant="text"
+            onClick={onBackToLevels}
+            sx={{ borderRadius: "999px", color: "#3a134d" }}
+          >
+            Back to levels
+          </Button>
+        </Box>
       </Box>
     </Box>
   );

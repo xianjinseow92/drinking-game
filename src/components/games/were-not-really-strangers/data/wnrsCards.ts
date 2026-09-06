@@ -25,7 +25,7 @@ export const wnrsLevels: IWnrsLevelMeta[] = [
   {
     level: 3,
     name: "Reflection",
-    tagline: "What tonight changed. Say the thing you'd normally keep.",
+    tagline: "Look back on the game you just played. Say the thing you'd normally keep.",
   },
 ];
 
@@ -115,7 +115,7 @@ export const wnrsFinalCard: IWnrsCard = {
   kind: "final",
   level: null,
   text:
-    "Write a short note to the person across from you. Something you noticed tonight, something you're grateful for, or something you hope for them. Fold it, hand it over, and ask them not to open it until they're home.",
+    "Both of you: write a short note to the other person. Something you noticed tonight, something you're grateful for, or something you hope for them. Fold it, swap, and don't open it until you've said goodbye.",
 };
 
 export const WNRS_WILDCARDS_PER_LEVEL = 2;
