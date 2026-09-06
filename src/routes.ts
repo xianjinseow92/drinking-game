@@ -23,8 +23,10 @@ const WereNotReallyStrangers = lazy(
     )
 );
 
-// All Routes
-export const mainPage = "/drinking-game";
+// All Routes. Paths are relative to the router basename (see index.tsx), so
+// on GitHub Pages "/" is https://<user>.github.io/drinking-game and each game
+// is https://<user>.github.io/drinking-game/<game>.
+export const mainPage = "/";
 const routes: IPath[] = [
   { name: mainPage, component: GameSelectPage },
   { name: gameNames.higherOrLower, component: HigherOrLowerGameBoard },

@@ -22,7 +22,12 @@ import GoBackToMainPage from "components/go-back-to-main-page/GoBackToMainpage";
 
 const renderRoute = (route: any) => {
   return (
-    <Route key={route.name} path={route.name} component={route.component} />
+    <Route
+      key={route.name}
+      exact
+      path={route.name}
+      component={route.component}
+    />
   );
 };
 
@@ -46,12 +51,7 @@ function App() {
       </Suspense>
 
       {/* Allows user to go back to Game Select Page when accessing other pages */}
-      {isNotMainRoute(location.pathname) &&
-      location.pathname !== mainPage + "/" ? (
-        <GoBackToMainPage />
-      ) : (
-        ""
-      )}
+      {isNotMainRoute(location.pathname) ? <GoBackToMainPage /> : ""}
     </ThemeProvider>
   );
 }
