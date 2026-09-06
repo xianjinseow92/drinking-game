@@ -67,13 +67,13 @@ describe("WereNotReallyStrangers", () => {
     startLevelOne();
 
     expect(progress()).toBe(`1 of ${deckSize(1)}`);
-    expect(turn()).toMatch(/Asks\s*Alex\s*→\s*Answers\s*Sam/);
+    expect(turn()).toMatch(/Alex asks · Sam answers/);
 
     clickAnswered();
-    expect(turn()).toMatch(/Asks\s*Sam\s*→\s*Answers\s*Alex/);
+    expect(turn()).toMatch(/Sam asks · Alex answers/);
 
     clickSkip();
-    expect(turn()).toMatch(/Asks\s*Alex\s*→\s*Answers\s*Sam/);
+    expect(turn()).toMatch(/Alex asks · Sam answers/);
     expect(progress()).toBe(`3 of ${deckSize(1)}`);
   });
 
@@ -114,12 +114,12 @@ describe("WereNotReallyStrangers", () => {
     render(<WereNotReallyStrangers />);
     startLevelOne();
 
-    const askerName = () => turn().split("→")[0].replace(/asks/i, "").trim();
+    const askerName = () => (turn().match(/^(.*?) asks/) || [, ""])[1];
     const digDeeper = () => screen.getByRole("button", { name: /dig deeper/i });
     // Advance until the named player is asking on a prompt card (wildcards
     // swap roles too, so we can't rely on card parity).
     const advanceUntilAsking = (name: string) => {
-      for (let guard = 0; guard < 12 && (askerName() !== name || isWildcard()); guard += 1) {
+      for (let guard = 0; guard < 12 && (isWildcard() || askerName() !== name); guard += 1) {
         clickAnswered();
       }
       expect(askerName()).toBe(name);
@@ -127,18 +127,18 @@ describe("WereNotReallyStrangers", () => {
     };
 
     advanceUntilAsking("Player 1");
-    expect(digDeeper()).toHaveTextContent(/player 1 has 1 left/i);
+    expect(digDeeper()).toHaveTextContent(/1 left/i);
     expect(digDeeper()).toBeEnabled();
     fireEvent.click(digDeeper());
-    expect(screen.getByText(/dig deeper, player 2/i)).toBeInTheDocument();
+    expect(turn()).toMatch(/dig deeper, player 2/i);
     expect(digDeeper()).toBeDisabled();
 
     advanceUntilAsking("Player 2");
-    expect(digDeeper()).toHaveTextContent(/player 2 has 1 left/i);
+    expect(digDeeper()).toHaveTextContent(/1 left/i);
     expect(digDeeper()).toBeEnabled();
 
     advanceUntilAsking("Player 1");
-    expect(digDeeper()).toHaveTextContent(/player 1 used it this level/i);
+    expect(digDeeper()).toHaveTextContent(/· used/i);
     expect(digDeeper()).toBeDisabled();
 
     // Jumping to the next level resets both.
@@ -147,7 +147,7 @@ describe("WereNotReallyStrangers", () => {
       screen.getByRole("heading", { level: 2, name: /level 2 · connection/i })
     ).toBeInTheDocument();
     advanceUntilAsking("Player 1");
-    expect(digDeeper()).toHaveTextContent(/player 1 has 1 left/i);
+    expect(digDeeper()).toHaveTextContent(/1 left/i);
     expect(digDeeper()).toBeEnabled();
   });
 

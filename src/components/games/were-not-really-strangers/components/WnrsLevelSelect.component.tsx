@@ -1,4 +1,4 @@
-import { Box, Button, TextField, Typography } from "@mui/material";
+import { Box, Button, InputBase, Typography } from "@mui/material";
 
 import {
   IWnrsLevelMeta,
@@ -22,14 +22,45 @@ const levelAccent: Record<TWnrsLevel, string> = {
 };
 
 const nameFieldStyles = {
-  "& .MuiOutlinedInput-root": {
-    borderRadius: "14px",
-    backgroundColor: "rgba(255,255,255,0.94)",
-    color: "#3a134d",
-    fontWeight: 700,
-  },
-  "& .MuiInputLabel-root": { color: "#3a134d" },
+  width: "100%",
+  borderRadius: "14px",
+  backgroundColor: "rgba(255,255,255,0.96)",
+  color: "#3a134d",
+  fontWeight: 700,
+  fontSize: "1rem",
+  paddingX: 1.5,
+  paddingY: 0.6,
+  border: "2px solid transparent",
+  "&.Mui-focused": { borderColor: "#ff9a00" },
+  "& input": { padding: 0 },
 } as const;
+
+const NameField = ({
+  label,
+  value,
+  onChange,
+}: {
+  label: string;
+  value: string;
+  onChange: (value: string) => void;
+}) => (
+  <Box sx={{ display: "flex", flexDirection: "column", gap: 0.5, minWidth: 0 }}>
+    <Typography
+      component="label"
+      variant="overline"
+      sx={{ mb: 0, lineHeight: 1.2, letterSpacing: "0.18em", textAlign: "left", opacity: 0.9 }}
+    >
+      {label}
+    </Typography>
+    <InputBase
+      value={value}
+      onChange={(event: any) => onChange(event.target.value)}
+      onFocus={(event: any) => event.target.select()}
+      inputProps={{ "aria-label": `${label} name`, maxLength: 16 }}
+      sx={nameFieldStyles}
+    />
+  </Box>
+);
 
 const WnrsLevelSelect = ({
   levels,
@@ -71,23 +102,15 @@ const WnrsLevelSelect = ({
           paddingX: { xs: 0.5, md: 0 },
         }}
       >
-        <TextField
+        <NameField
           label="Player 1"
           value={playerNames.playerOne}
-          onChange={(event: any) => onPlayerNameChange("playerOne", event.target.value)}
-          onFocus={(event: any) => event.target.select()}
-          size="small"
-          inputProps={{ "aria-label": "Player 1 name", maxLength: 16 }}
-          sx={nameFieldStyles}
+          onChange={(value) => onPlayerNameChange("playerOne", value)}
         />
-        <TextField
+        <NameField
           label="Player 2"
           value={playerNames.playerTwo}
-          onChange={(event: any) => onPlayerNameChange("playerTwo", event.target.value)}
-          onFocus={(event: any) => event.target.select()}
-          size="small"
-          inputProps={{ "aria-label": "Player 2 name", maxLength: 16 }}
-          sx={nameFieldStyles}
+          onChange={(value) => onPlayerNameChange("playerTwo", value)}
         />
       </Box>
 

@@ -50,8 +50,10 @@ const textButtonStyles = {
   color: "#fff7fb",
   borderRadius: "999px",
   minWidth: 0,
-  paddingX: 1.25,
-  fontSize: { xs: "0.78rem", md: "0.875rem" },
+  minHeight: 40,
+  paddingX: 1.1,
+  fontSize: { xs: "0.74rem", md: "0.85rem" },
+  textTransform: "none",
 } as const;
 
 const WereNotReallyStrangers = () => {
@@ -182,32 +184,44 @@ const WereNotReallyStrangers = () => {
     setLastAction(null);
   };
 
-  const statusMessage = useMemo(() => {
+  const turnLine = useMemo(() => {
     if (phase === "final") {
-      return "Both of you write. Swap notes. Don't open them until you've said goodbye.";
+      return (
+        <>
+          Both of you write. Swap notes. Don&apos;t open them until you&apos;ve said goodbye.
+        </>
+      );
     }
 
     if (phase !== "playing" || !activeCard) {
-      return "";
+      return null;
     }
 
     const askerName = playerNames[asker];
     const answererName = playerNames[answerer];
 
     if (activeCard.kind === "wildcard") {
-      return `Wildcard. ${answererName}, do what it says.`;
+      return (
+        <>
+          <b>{answererName}</b>, do what it says.
+        </>
+      );
     }
 
     if (digDeeperActive) {
-      return `Dig deeper, ${answererName}. One layer further.`;
+      return (
+        <>
+          Dig deeper, <b>{answererName}</b>. One layer further.
+        </>
+      );
     }
 
-    if (lastAction === "skipped") {
-      return `Sip for the skip. ${askerName} reads this one, ${answererName} answers.`;
-    }
-
-    return `${askerName} reads it out loud. ${answererName} answers.`;
-  }, [activeCard, answerer, asker, digDeeperActive, lastAction, phase, playerNames]);
+    return (
+      <>
+        <b>{askerName}</b> asks · <b>{answererName}</b> answers
+      </>
+    );
+  }, [activeCard, answerer, asker, digDeeperActive, phase, playerNames]);
 
   const eyebrow =
     activeCard?.kind === "wildcard"
@@ -258,20 +272,22 @@ const WereNotReallyStrangers = () => {
 
           {(phase === "playing" || phase === "final") && activeCard && (
             <>
+              {/* Context: small and quiet. */}
               <Box
                 sx={{
                   width: "100%",
                   maxWidth: 560,
                   display: "flex",
-                  alignItems: "center",
+                  alignItems: "baseline",
                   justifyContent: "space-between",
                   gap: 1,
+                  opacity: 0.85,
                 }}
               >
                 <Typography
-                  variant="h6"
+                  variant="body2"
                   component="h2"
-                  sx={{ mb: 0, textAlign: "left", fontSize: { xs: "1.05rem", md: "1.25rem" } }}
+                  sx={{ mb: 0, textAlign: "left", fontWeight: 700, letterSpacing: "0.04em" }}
                 >
                   {phase === "final"
                     ? "The final card"
@@ -288,56 +304,7 @@ const WereNotReallyStrangers = () => {
                 )}
               </Box>
 
-              {phase === "playing" && (
-                <Box
-                  aria-label="Turn"
-                  sx={{
-                    width: "100%",
-                    maxWidth: 560,
-                    display: "grid",
-                    gridTemplateColumns: "1fr auto 1fr",
-                    alignItems: "center",
-                    gap: 0.75,
-                    borderRadius: "16px",
-                    padding: { xs: "8px 12px", md: "10px 16px" },
-                    background: "rgba(255,255,255,0.14)",
-                    border: "1px solid rgba(255,255,255,0.35)",
-                  }}
-                >
-                  <Box sx={{ textAlign: "left", minWidth: 0 }}>
-                    <Typography
-                      variant="overline"
-                      sx={{ mb: 0, lineHeight: 1.2, letterSpacing: "0.16em", opacity: 0.85, display: "block", textAlign: "left" }}
-                    >
-                      Asks
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{ mb: 0, fontWeight: 800, textAlign: "left", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                    >
-                      {playerNames[asker]}
-                    </Typography>
-                  </Box>
-                  <Typography variant="h5" sx={{ mb: 0, opacity: 0.7 }}>
-                    →
-                  </Typography>
-                  <Box sx={{ textAlign: "right", minWidth: 0 }}>
-                    <Typography
-                      variant="overline"
-                      sx={{ mb: 0, lineHeight: 1.2, letterSpacing: "0.16em", opacity: 0.85, display: "block", textAlign: "right" }}
-                    >
-                      Answers
-                    </Typography>
-                    <Typography
-                      variant="body1"
-                      sx={{ mb: 0, fontWeight: 800, textAlign: "right", lineHeight: 1.15, overflow: "hidden", textOverflow: "ellipsis", whiteSpace: "nowrap" }}
-                    >
-                      {playerNames[answerer]}
-                    </Typography>
-                  </Box>
-                </Box>
-              )}
-
+              {/* Focus: the card. */}
               <WnrsActiveCard
                 key={activeCard.id}
                 card={activeCard}
@@ -345,15 +312,42 @@ const WereNotReallyStrangers = () => {
                 isVisible={isCardVisible}
               />
 
-              <Box aria-live="polite" sx={{ maxWidth: 560 }}>
+              {/* One line that says whose turn it is. */}
+              <Box
+                aria-live="polite"
+                sx={{
+                  maxWidth: 560,
+                  display: "flex",
+                  flexDirection: "column",
+                  alignItems: "center",
+                  gap: 0.5,
+                }}
+              >
                 <Typography
+                  aria-label="Turn"
                   variant="body1"
-                  sx={{ mb: 0, fontSize: { xs: "0.92rem", md: "1rem" } }}
+                  sx={{ mb: 0, fontSize: { xs: "1.02rem", md: "1.1rem" }, lineHeight: 1.3 }}
                 >
-                  {statusMessage}
+                  {turnLine}
                 </Typography>
+                {phase === "playing" && lastAction === "skipped" && (
+                  <Typography
+                    variant="body2"
+                    sx={{
+                      mb: 0,
+                      paddingX: 1.25,
+                      paddingY: 0.25,
+                      borderRadius: "999px",
+                      background: "rgba(255,255,255,0.16)",
+                      fontWeight: 700,
+                    }}
+                  >
+                    {playerNames[asker]} sips
+                  </Typography>
+                )}
               </Box>
 
+              {/* Primary action, then quiet secondaries. */}
               {phase === "playing" ? (
                 <Box
                   sx={{
@@ -361,72 +355,70 @@ const WereNotReallyStrangers = () => {
                     maxWidth: 560,
                     display: "flex",
                     flexDirection: "column",
-                    gap: { xs: 0.9, md: 1.25 },
+                    alignItems: "center",
+                    gap: { xs: 0.5, md: 1 },
                   }}
                 >
+                  <Button
+                    variant="contained"
+                    color="secondary"
+                    aria-label="Answered, next card"
+                    onClick={() => advance("answered")}
+                    sx={{
+                      width: "100%",
+                      minHeight: { xs: 58, md: 56 },
+                      borderRadius: "999px",
+                      fontSize: { xs: "1.05rem", md: "1.1rem" },
+                      fontWeight: 800,
+                      letterSpacing: "0.04em",
+                    }}
+                  >
+                    Answered
+                  </Button>
+
                   <Box
                     sx={{
+                      width: "100%",
                       display: "grid",
                       gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                      gap: { xs: 0.9, md: 1.25 },
+                      gap: 0.5,
                     }}
                   >
                     <Button
-                      variant="outlined"
+                      variant="text"
                       aria-label="Skip this card and take a sip"
                       onClick={() => advance("skipped")}
                       sx={{
-                        minHeight: { xs: 54, md: 52 },
+                        minHeight: 44,
                         borderRadius: "999px",
-                        color: "#fff7fb",
-                        borderColor: "rgba(255,255,255,0.7)",
-                        "&:hover": {
-                          borderColor: "#fff7fb",
-                          background: "rgba(255,255,255,0.1)",
-                        },
+                        color: "rgba(255,247,251,0.85)",
+                        textTransform: "none",
+                        fontSize: { xs: "0.9rem", md: "0.95rem" },
                       }}
                     >
                       Skip (sip!)
                     </Button>
                     <Button
-                      variant="contained"
-                      color="secondary"
-                      aria-label="Answered, next card"
-                      onClick={() => advance("answered")}
-                      sx={{ minHeight: { xs: 54, md: 52 }, borderRadius: "999px" }}
+                      variant="text"
+                      aria-label={`Dig deeper, ${playerNames[asker]}'s one use this level`}
+                      onClick={handleDigDeeper}
+                      disabled={!canDigDeeper}
+                      sx={{
+                        minHeight: 44,
+                        borderRadius: "999px",
+                        color: "rgba(255,247,251,0.85)",
+                        textTransform: "none",
+                        fontSize: { xs: "0.9rem", md: "0.95rem" },
+                        "&.Mui-disabled": { color: "rgba(255,247,251,0.4)" },
+                      }}
                     >
-                      Answered
+                      {digDeeperActive
+                        ? "Digging deeper…"
+                        : digDeeperUsed[asker]
+                          ? "Dig deeper · used"
+                          : "Dig deeper · 1 left"}
                     </Button>
                   </Box>
-
-                  <Button
-                    variant="outlined"
-                    aria-label={`Dig deeper, ${playerNames[asker]}'s one use this level`}
-                    onClick={handleDigDeeper}
-                    disabled={!canDigDeeper}
-                    sx={{
-                      minHeight: { xs: 44, md: 46 },
-                      borderRadius: "999px",
-                      color: "#fff7fb",
-                      borderColor: "rgba(255,255,255,0.45)",
-                      textTransform: "none",
-                      fontSize: { xs: "0.82rem", md: "0.9rem" },
-                      "&.Mui-disabled": {
-                        color: "rgba(255,247,251,0.45)",
-                        borderColor: "rgba(255,255,255,0.2)",
-                      },
-                      "&:hover": {
-                        borderColor: "#fff7fb",
-                        background: "rgba(255,255,255,0.1)",
-                      },
-                    }}
-                  >
-                    {digDeeperActive
-                      ? "Digging deeper…"
-                      : digDeeperUsed[asker]
-                        ? `Dig deeper · ${playerNames[asker]} used it this level`
-                        : `Dig deeper · ${playerNames[asker]} has 1 left`}
-                  </Button>
                 </Box>
               ) : (
                 <Button
@@ -435,21 +427,25 @@ const WereNotReallyStrangers = () => {
                   aria-label="Play again"
                   onClick={backToLevels}
                   sx={{
-                    minHeight: { xs: 54, md: 52 },
+                    minHeight: { xs: 58, md: 56 },
                     borderRadius: "999px",
-                    minWidth: 200,
+                    minWidth: 220,
+                    fontWeight: 800,
                   }}
                 >
                   Play again
                 </Button>
               )}
 
+              {/* Utilities: smallest and most muted. */}
               <Box
                 sx={{
                   display: "flex",
                   flexWrap: "wrap",
                   justifyContent: "center",
                   gap: { xs: 0.25, md: 1 },
+                  marginTop: { xs: 0.25, md: 0.5 },
+                  opacity: 0.75,
                 }}
               >
                 <Button
