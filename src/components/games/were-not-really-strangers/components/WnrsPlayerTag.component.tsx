@@ -16,15 +16,16 @@ const WnrsPlayerTag = ({ player, name, size = "md" }: IWnrsPlayerTagProps) => {
     <Box
       component="span"
       sx={{
-        display: "inline-block",
-        verticalAlign: "baseline",
+        display: "inline-flex",
+        alignItems: "center",
+        verticalAlign: "middle",
         borderRadius: "999px",
         background: colors.bg,
         color: colors.text,
         fontWeight: 800,
-        lineHeight: 1.2,
+        lineHeight: 1,
         paddingX: size === "sm" ? 0.9 : 1.2,
-        paddingY: size === "sm" ? 0.15 : 0.3,
+        height: size === "sm" ? 22 : 30,
         fontSize: size === "sm" ? "0.82em" : "0.95em",
         maxWidth: "12ch",
         overflow: "hidden",

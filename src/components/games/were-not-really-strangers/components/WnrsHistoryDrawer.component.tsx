@@ -70,9 +70,12 @@ const WnrsHistoryDrawer = ({
       anchor="right"
       open={open}
       onClose={onClose}
-      PaperProps={{
-        sx: {
+      // The app theme makes drawer paper 30% translucent; override at the
+      // same specificity so this drawer is solid and readable.
+      sx={{
+        "& .MuiDrawer-paper": {
           backgroundColor: "#fff7fb",
+          backgroundImage: "none",
           color: "#3a134d",
         },
       }}

@@ -52,24 +52,47 @@ const otherPlayer = (player: TWnrsPlayer): TWnrsPlayer =>
 const getLevelMeta = (level: TWnrsLevel) =>
   wnrsLevels.find((meta) => meta.level === level) ?? wnrsLevels[0];
 
-// Utility chips: bordered with an icon so they read as tappable on a flat
-// coloured background, but small and quiet next to the primary action.
-const chipButtonStyles = {
-  color: "#fff7fb",
+// Secondary actions: two identical outlined pills under the primary button.
+const secondaryPillStyles = {
+  minHeight: 48,
   borderRadius: "999px",
-  minWidth: 0,
-  minHeight: 38,
-  paddingX: 1.25,
-  paddingY: 0.4,
-  fontSize: { xs: "0.78rem", md: "0.85rem" },
-  fontWeight: 700,
+  color: "#fff7fb",
+  borderColor: "rgba(255,255,255,0.7)",
+  borderWidth: 2,
   textTransform: "none",
-  border: "1.5px solid rgba(255,255,255,0.5)",
-  background: "rgba(255,255,255,0.12)",
-  gap: 0.6,
-  "& .MuiButton-startIcon": { marginRight: 0, marginLeft: 0 },
-  "& svg": { fontSize: 18 },
-  "&:hover": { background: "rgba(255,255,255,0.22)", borderColor: "#fff7fb" },
+  fontWeight: 700,
+  fontSize: { xs: "0.95rem", md: "1rem" },
+  "&:hover": {
+    borderWidth: 2,
+    borderColor: "#fff7fb",
+    background: "rgba(255,255,255,0.12)",
+  },
+  "&.Mui-disabled": {
+    color: "rgba(255,247,251,0.45)",
+    borderColor: "rgba(255,255,255,0.3)",
+    borderWidth: 2,
+  },
+} as const;
+
+// Utilities: a flat icon-over-label bar, the familiar mobile tab-bar shape.
+const tabItemStyles = {
+  flex: 1,
+  minWidth: 0,
+  minHeight: 56,
+  display: "flex",
+  flexDirection: "column",
+  alignItems: "center",
+  justifyContent: "center",
+  gap: 0.35,
+  borderRadius: "14px",
+  color: "rgba(255,247,251,0.92)",
+  textTransform: "none",
+  fontWeight: 600,
+  fontSize: { xs: "0.7rem", md: "0.78rem" },
+  lineHeight: 1,
+  padding: "6px 4px",
+  "& svg": { fontSize: 22 },
+  "&:hover": { background: "rgba(255,255,255,0.12)" },
 } as const;
 
 const WereNotReallyStrangers = () => {
@@ -220,16 +243,30 @@ const WereNotReallyStrangers = () => {
     const answererTag = <WnrsPlayerTag player={answerer} name={answererName} />;
 
     if (activeCard.kind === "wildcard") {
-      return <>{answererTag}, do what it says.</>;
+      return (
+        <>
+          {answererTag}
+          <span>, do what it says.</span>
+        </>
+      );
     }
 
     if (digDeeperActive) {
-      return <>Dig deeper, {answererTag}. One layer further.</>;
+      return (
+        <>
+          <span>Dig deeper, </span>
+          {answererTag}
+          <span>. One layer further.</span>
+        </>
+      );
     }
 
     return (
       <>
-        {askerTag} asks · {answererTag} answers
+        {askerTag}
+        <span> asks · </span>
+        {answererTag}
+        <span> answers</span>
       </>
     );
   }, [activeCard, answerer, asker, digDeeperActive, phase, playerNames]);
@@ -264,7 +301,7 @@ const WereNotReallyStrangers = () => {
             flexDirection: "column",
             alignItems: "center",
             justifyContent: "center",
-            gap: { xs: 1.1, md: 2 },
+            gap: { xs: 1.75, md: 2.25 },
             paddingTop: { xs: 5.5, md: 0 },
             paddingBottom: { xs: 1, md: 8 },
           }}
@@ -331,13 +368,24 @@ const WereNotReallyStrangers = () => {
                   display: "flex",
                   flexDirection: "column",
                   alignItems: "center",
-                  gap: 0.5,
+                  gap: 0.75,
+                  marginTop: { xs: 0.25, md: 0.5 },
                 }}
               >
                 <Typography
                   aria-label="Turn"
                   variant="body1"
-                  sx={{ mb: 0, fontSize: { xs: "1.02rem", md: "1.1rem" }, lineHeight: 1.3 }}
+                  component="div"
+                  sx={{
+                    mb: 0,
+                    fontSize: { xs: "1.02rem", md: "1.1rem" },
+                    lineHeight: 1,
+                    display: "flex",
+                    alignItems: "center",
+                    justifyContent: "center",
+                    flexWrap: "wrap",
+                    gap: 0.6,
+                  }}
                 >
                   {turnLine}
                 </Typography>
@@ -368,7 +416,8 @@ const WereNotReallyStrangers = () => {
                     display: "flex",
                     flexDirection: "column",
                     alignItems: "center",
-                    gap: { xs: 0.5, md: 1 },
+                    gap: { xs: 1.25, md: 1.5 },
+                    marginTop: { xs: 0.5, md: 0.75 },
                   }}
                 >
                   <Button
@@ -393,48 +442,23 @@ const WereNotReallyStrangers = () => {
                       width: "100%",
                       display: "grid",
                       gridTemplateColumns: "repeat(2, minmax(0, 1fr))",
-                      gap: 0.5,
+                      gap: 1,
                     }}
                   >
                     <Button
                       variant="outlined"
                       aria-label="Skip this card and take a sip"
                       onClick={() => advance("skipped")}
-                      sx={{
-                        minHeight: 48,
-                        borderRadius: "999px",
-                        color: "#fff7fb",
-                        borderColor: "rgba(255,255,255,0.75)",
-                        borderWidth: 2,
-                        textTransform: "none",
-                        fontWeight: 700,
-                        fontSize: { xs: "0.95rem", md: "1rem" },
-                        "&:hover": {
-                          borderWidth: 2,
-                          borderColor: "#fff7fb",
-                          background: "rgba(255,255,255,0.12)",
-                        },
-                      }}
+                      sx={secondaryPillStyles}
                     >
                       Skip (sip!)
                     </Button>
                     <Button
-                      variant="text"
+                      variant="outlined"
                       aria-label={`Dig deeper, ${playerNames[asker]}'s one use this level`}
                       onClick={handleDigDeeper}
                       disabled={!canDigDeeper}
-                      sx={{
-                        minHeight: 48,
-                        borderRadius: "999px",
-                        color: "rgba(255,247,251,0.9)",
-                        textTransform: "none",
-                        textDecoration: "underline",
-                        textDecorationColor: "rgba(255,247,251,0.45)",
-                        textUnderlineOffset: "4px",
-                        fontSize: { xs: "0.9rem", md: "0.95rem" },
-                        "&.Mui-disabled": { color: "rgba(255,247,251,0.4)", textDecoration: "none" },
-                        "&:hover": { textDecoration: "underline", background: "rgba(255,255,255,0.08)" },
-                      }}
+                      sx={secondaryPillStyles}
                     >
                       {digDeeperActive
                         ? "Digging deeper…"
@@ -464,27 +488,30 @@ const WereNotReallyStrangers = () => {
               {/* Utilities: smallest and most muted. */}
               <Box
                 sx={{
+                  width: "100%",
+                  maxWidth: 560,
                   display: "flex",
-                  flexWrap: "wrap",
-                  justifyContent: "center",
-                  gap: { xs: 0.6, md: 1 },
-                  marginTop: { xs: 0.5, md: 0.75 },
+                  justifyContent: "space-between",
+                  gap: 0.5,
+                  marginTop: { xs: 1.5, md: 2 },
+                  paddingTop: 1.25,
+                  borderTop: "1px solid rgba(255,255,255,0.28)",
                 }}
               >
                 <Button
                   aria-label="Open rules"
                   onClick={() => setIsRulesOpen(true)}
-                  startIcon={<HelpOutlineRoundedIcon />}
-                  sx={chipButtonStyles}
+                  sx={tabItemStyles}
                 >
+                  <HelpOutlineRoundedIcon />
                   Rules
                 </Button>
                 <Button
                   aria-label="Open history"
                   onClick={() => setIsHistoryOpen(true)}
-                  startIcon={<HistoryRoundedIcon />}
-                  sx={chipButtonStyles}
+                  sx={tabItemStyles}
                 >
+                  <HistoryRoundedIcon />
                   History
                 </Button>
                 {phase === "playing" && (
@@ -494,17 +521,17 @@ const WereNotReallyStrangers = () => {
                         level >= LAST_LEVEL ? "Go to the final card" : `Go to level ${level + 1}`
                       }
                       onClick={goToNextLevel}
-                      startIcon={<ArrowForwardRoundedIcon />}
-                      sx={chipButtonStyles}
+                      sx={tabItemStyles}
                     >
+                      <ArrowForwardRoundedIcon />
                       {level >= LAST_LEVEL ? "Final card" : `Level ${level + 1}`}
                     </Button>
                     <Button
                       aria-label="Back to level select"
                       onClick={backToLevels}
-                      startIcon={<GridViewRoundedIcon />}
-                      sx={chipButtonStyles}
+                      sx={tabItemStyles}
                     >
+                      <GridViewRoundedIcon />
                       Levels
                     </Button>
                   </>
