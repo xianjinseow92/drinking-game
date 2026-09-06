@@ -110,6 +110,27 @@ describe("WereNotReallyStrangers", () => {
     expect(skippedOnly[0]).toHaveTextContent(skippedText);
   });
 
+  test("tapping a history entry enlarges the card; tapping outside closes it", () => {
+    render(<WereNotReallyStrangers />);
+    startLevelOne();
+    clickAnswered();
+
+    fireEvent.click(screen.getAllByRole("button", { name: /open history/i })[0]);
+    const entry = screen.getAllByTestId("history-entry")[0];
+    const cardText = within(entry).getByTestId("history-card-text").textContent ?? "";
+
+    fireEvent.click(entry);
+    const dialog = screen.getByRole("dialog", { name: /enlarged card/i });
+    expect(within(dialog).getByRole("article")).toHaveTextContent(cardText);
+    expect(screen.getByText(/tap anywhere to close/i)).toBeInTheDocument();
+
+    // Clicking inside the card keeps it open; clicking the overlay closes it.
+    fireEvent.click(within(dialog).getByRole("article"));
+    expect(screen.getByRole("dialog", { name: /enlarged card/i })).toBeInTheDocument();
+    fireEvent.click(screen.getByText(/tap anywhere to close/i));
+    expect(screen.queryByRole("dialog", { name: /enlarged card/i })).not.toBeInTheDocument();
+  });
+
   test("dig deeper is optional, one per player per level, and resets on a new level", () => {
     render(<WereNotReallyStrangers />);
     startLevelOne();

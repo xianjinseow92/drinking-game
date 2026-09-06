@@ -30,3 +30,6 @@ to the official one-asks-one-answers flow and tuned for dating on mobile.
 - [x] History log: who drew, who answered/skipped, dig-deeper flag; skipped-only filter; per-player sip tallies.
 - [x] Level summary shows per-player sips. Final card asks both to write.
 - [x] Rules drawer rewritten; mobile spacing tightened.
+- [x] Routing: router rooted at PUBLIC_URL so deep links work on GitHub Pages.
+- [x] Player identity colours + tags; twin Skip / Dig Deeper pills; icon tab-bar footer; opaque drawers.
+- [x] History: Answered-by filter; tap an entry to enlarge the card in an overlay (tap outside to close).

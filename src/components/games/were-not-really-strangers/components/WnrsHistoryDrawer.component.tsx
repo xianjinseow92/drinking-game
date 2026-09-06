@@ -1,13 +1,15 @@
 import { useState } from "react";
 
-import { Box, Button, Drawer, Typography } from "@mui/material";
+import { Box, Button, Drawer, Modal, Typography } from "@mui/material";
 
+import { wnrsLevels } from "../data/wnrsCards";
 import {
   IWnrsHistoryEntry,
   TWnrsPlayer,
   TWnrsPlayerNames,
 } from "../types/wnrs.types";
 import { playerColors } from "../utils/wnrs.players";
+import WnrsActiveCard from "./WnrsActiveCard.component";
 import WnrsPlayerTag from "./WnrsPlayerTag.component";
 
 interface IWnrsHistoryDrawerProps {
@@ -57,6 +59,14 @@ const WnrsHistoryDrawer = ({
 }: IWnrsHistoryDrawerProps) => {
   const [outcomeFilter, setOutcomeFilter] = useState<TOutcomeFilter>("all");
   const [playerFilter, setPlayerFilter] = useState<TPlayerFilter>("both");
+  const [enlarged, setEnlarged] = useState<IWnrsHistoryEntry | null>(null);
+
+  const eyebrowFor = (entry: IWnrsHistoryEntry) =>
+    entry.card.kind === "wildcard"
+      ? "Wildcard"
+      : `Level ${entry.level} · ${
+          wnrsLevels.find((meta) => meta.level === entry.level)?.name ?? ""
+        }`;
 
   const sips = countSips(history);
   const skippedCount = history.filter((entry) => entry.outcome === "skipped").length;
@@ -195,6 +205,16 @@ const WnrsHistoryDrawer = ({
               <Box
                 key={entry.id}
                 data-testid="history-entry"
+                role="button"
+                tabIndex={0}
+                aria-label={`Enlarge card: ${entry.card.text}`}
+                onClick={() => setEnlarged(entry)}
+                onKeyDown={(event: any) => {
+                  if (event.key === "Enter" || event.key === " ") {
+                    event.preventDefault();
+                    setEnlarged(entry);
+                  }
+                }}
                 sx={{
                   borderRadius: "18px",
                   padding: 1.75,
@@ -203,6 +223,14 @@ const WnrsHistoryDrawer = ({
                   borderLeft: `6px solid ${playerColors[entry.answerer].bg}`,
                   boxShadow: "0 10px 22px rgba(0,0,0,0.06)",
                   textAlign: "left",
+                  cursor: "pointer",
+                  transition: "transform 120ms ease, box-shadow 120ms ease",
+                  "&:hover, &:focus-visible": {
+                    transform: "translateY(-1px)",
+                    boxShadow: "0 14px 28px rgba(0,0,0,0.12)",
+                    outline: "none",
+                  },
+                  "&:active": { transform: "scale(0.99)" },
                 }}
               >
                 <Typography
@@ -258,6 +286,65 @@ const WnrsHistoryDrawer = ({
           Close
         </Button>
       </Box>
+
+      {/* Tap a history entry to see the card at full size. Tap anywhere
+          outside the card to dismiss. */}
+      <Modal
+        open={Boolean(enlarged)}
+        onClose={() => setEnlarged(null)}
+        aria-labelledby="wnrs-enlarged-card"
+        BackdropProps={{ sx: { backgroundColor: "rgba(58, 19, 77, 0.72)" } }}
+      >
+        <Box
+          onClick={() => setEnlarged(null)}
+          sx={{
+            position: "fixed",
+            inset: 0,
+            display: "flex",
+            flexDirection: "column",
+            alignItems: "center",
+            justifyContent: "center",
+            gap: 2,
+            padding: 2,
+            outline: "none",
+          }}
+        >
+          {enlarged && (
+            <>
+              <Box
+                role="dialog"
+                id="wnrs-enlarged-card"
+                aria-label={`Enlarged card: ${enlarged.card.text}`}
+                onClick={(event: any) => event.stopPropagation()}
+              >
+                <WnrsActiveCard
+                  card={enlarged.card}
+                  eyebrow={eyebrowFor(enlarged)}
+                  isVisible
+                />
+              </Box>
+              <Box
+                sx={{
+                  display: "flex",
+                  alignItems: "center",
+                  gap: 0.75,
+                  color: "#fff7fb",
+                  fontSize: "1rem",
+                  lineHeight: 1,
+                }}
+              >
+                <WnrsPlayerTag player={enlarged.asker} name={playerNames[enlarged.asker]} />
+                <span>drew ·</span>
+                <WnrsPlayerTag player={enlarged.answerer} name={playerNames[enlarged.answerer]} />
+                <span>{enlarged.outcome === "skipped" ? "skipped" : "answered"}</span>
+              </Box>
+              <Typography variant="body2" sx={{ mb: 0, color: "rgba(255,247,251,0.75)" }}>
+                Tap anywhere to close
+              </Typography>
+            </>
+          )}
+        </Box>
+      </Modal>
     </Drawer>
   );
 };
