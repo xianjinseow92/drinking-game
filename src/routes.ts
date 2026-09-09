@@ -16,14 +16,27 @@ const HigherOrLowerGameBoard = lazy(
 );
 const MindMeld = lazy(() => import("components/games/mind-meld/MindMeld.component"));
 const Splurt = lazy(() => import("components/games/splurt/Splurt.component"));
+const WereNotReallyStrangers = lazy(
+  () =>
+    import(
+      "components/games/were-not-really-strangers/WereNotReallyStrangers.component"
+    )
+);
 
-// All Routes
-export const mainPage = "/drinking-game";
+// All Routes. Paths are relative to the router basename (see index.tsx), so
+// on GitHub Pages "/" is https://<user>.github.io/drinking-game and each game
+// is https://<user>.github.io/drinking-game/<game>.
+export const mainPage = "/";
 const routes: IPath[] = [
   { name: mainPage, component: GameSelectPage },
   { name: gameNames.higherOrLower, component: HigherOrLowerGameBoard },
   { name: gameNames.mindMeld, component: MindMeld },
   { name: gameNames.splurt, component: Splurt },
+  {
+    name: gameNames.wereNotReallyStrangers,
+    component: WereNotReallyStrangers,
+    label: "We're Not Really Strangers",
+  },
 ];
 
 const nonGameRoutes = [mainPage];

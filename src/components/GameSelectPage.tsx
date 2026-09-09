@@ -52,7 +52,7 @@ const GameSelectPage = (props: any) => {
           onClick={goToGame.bind(this, gameRoute.name)}
           sx={{ marginBottom: marginBottom }}
         >
-          {removeAllSlashes(cleanKebabString(gameRoute.name))}
+          {gameRoute.label ?? removeAllSlashes(cleanKebabString(gameRoute.name))}
         </Button>
       ))}
     </PageLayout>

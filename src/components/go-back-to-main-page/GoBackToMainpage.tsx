@@ -8,7 +8,7 @@ import Box from "@mui/material/Box";
 
 /**
  * Serves to redirect users back to Game Select Page.
- * Will render if route name is !== "/drinking-game" (controleld via App Component)
+ * Will render on every route except the main menu (controlled via App Component)
  * @param props 
  * @returns React.FC Component
  */

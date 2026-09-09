@@ -7,7 +7,9 @@ import reportWebVitals from "./reportWebVitals";
 import { BrowserRouter } from "react-router-dom";
 
 ReactDOM.render(
-  <BrowserRouter>
+  // PUBLIC_URL comes from "homepage" in package.json ("/drinking-game"), so
+  // every route below is rooted there: "/" is the menu, "/splurt" is a game.
+  <BrowserRouter basename={process.env.PUBLIC_URL}>
     <App />
   </BrowserRouter>,
   document.getElementById("root")
