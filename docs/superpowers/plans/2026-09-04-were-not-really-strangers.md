@@ -33,3 +33,17 @@ to the official one-asks-one-answers flow and tuned for dating on mobile.
 - [x] Routing: router rooted at PUBLIC_URL so deep links work on GitHub Pages.
 - [x] Player identity colours + tags; twin Skip / Dig Deeper pills; icon tab-bar footer; opaque drawers.
 - [x] History: Answered-by filter; tap an entry to enlarge the card in an overlay (tap outside to close).
+
+## v3 — card focus mode (2026-09-09)
+
+Owner asked for an immersive moment: the card itself should open full-size on
+a darkened room so the pair can sit with the question while answering.
+
+- [x] `WnrsCardOverlay` extracted and shared by the game screen and History,
+      so both enlarge views stay identical.
+- [x] The active card is the control: tap, Enter or Space opens it; the
+      backdrop is near-solid and blurred so the chrome behind stops reading.
+- [x] The focus face is a larger size variant, with the turn line carried into
+      the overlay. Tap anywhere outside, or press Escape, to close.
+- [x] Wildcard turn line reads "<player> does what it says." (the old copy left
+      a floating space before the comma).

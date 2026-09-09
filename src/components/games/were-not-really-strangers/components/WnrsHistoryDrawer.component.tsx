@@ -1,6 +1,6 @@
 import { useState } from "react";
 
-import { Box, Button, Drawer, Modal, Typography } from "@mui/material";
+import { Box, Button, Drawer, Typography } from "@mui/material";
 
 import { wnrsLevels } from "../data/wnrsCards";
 import {
@@ -9,7 +9,7 @@ import {
   TWnrsPlayerNames,
 } from "../types/wnrs.types";
 import { playerColors } from "../utils/wnrs.players";
-import WnrsActiveCard from "./WnrsActiveCard.component";
+import WnrsCardOverlay from "./WnrsCardOverlay.component";
 import WnrsPlayerTag from "./WnrsPlayerTag.component";
 
 interface IWnrsHistoryDrawerProps {
@@ -289,62 +289,29 @@ const WnrsHistoryDrawer = ({
 
       {/* Tap a history entry to see the card at full size. Tap anywhere
           outside the card to dismiss. */}
-      <Modal
-        open={Boolean(enlarged)}
+      <WnrsCardOverlay
+        card={enlarged?.card ?? null}
+        eyebrow={enlarged ? eyebrowFor(enlarged) : ""}
         onClose={() => setEnlarged(null)}
-        aria-labelledby="wnrs-enlarged-card"
-        BackdropProps={{ sx: { backgroundColor: "rgba(58, 19, 77, 0.72)" } }}
       >
-        <Box
-          onClick={() => setEnlarged(null)}
-          sx={{
-            position: "fixed",
-            inset: 0,
-            display: "flex",
-            flexDirection: "column",
-            alignItems: "center",
-            justifyContent: "center",
-            gap: 2,
-            padding: 2,
-            outline: "none",
-          }}
-        >
-          {enlarged && (
-            <>
-              <Box
-                role="dialog"
-                id="wnrs-enlarged-card"
-                aria-label={`Enlarged card: ${enlarged.card.text}`}
-                onClick={(event: any) => event.stopPropagation()}
-              >
-                <WnrsActiveCard
-                  card={enlarged.card}
-                  eyebrow={eyebrowFor(enlarged)}
-                  isVisible
-                />
-              </Box>
-              <Box
-                sx={{
-                  display: "flex",
-                  alignItems: "center",
-                  gap: 0.75,
-                  color: "#fff7fb",
-                  fontSize: "1rem",
-                  lineHeight: 1,
-                }}
-              >
-                <WnrsPlayerTag player={enlarged.asker} name={playerNames[enlarged.asker]} />
-                <span>drew ·</span>
-                <WnrsPlayerTag player={enlarged.answerer} name={playerNames[enlarged.answerer]} />
-                <span>{enlarged.outcome === "skipped" ? "skipped" : "answered"}</span>
-              </Box>
-              <Typography variant="body2" sx={{ mb: 0, color: "rgba(255,247,251,0.75)" }}>
-                Tap anywhere to close
-              </Typography>
-            </>
-          )}
-        </Box>
-      </Modal>
+        {enlarged && (
+          <Box
+            sx={{
+              display: "flex",
+              alignItems: "center",
+              gap: 0.75,
+              color: "#fff7fb",
+              fontSize: "1rem",
+              lineHeight: 1,
+            }}
+          >
+            <WnrsPlayerTag player={enlarged.asker} name={playerNames[enlarged.asker]} />
+            <span>drew ·</span>
+            <WnrsPlayerTag player={enlarged.answerer} name={playerNames[enlarged.answerer]} />
+            <span>{enlarged.outcome === "skipped" ? "skipped" : "answered"}</span>
+          </Box>
+        )}
+      </WnrsCardOverlay>
     </Drawer>
   );
 };

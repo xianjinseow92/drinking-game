@@ -22,8 +22,21 @@ const startLevelOne = () =>
     screen.getByRole("button", { name: /start level 1: perception/i })
   );
 
-const isWildcard = () =>
-  /wildcard card/i.test(screen.getByRole("article").getAttribute("aria-label") || "");
+const activeCard = () => screen.getByTestId("active-card");
+
+const isWildcard = () => activeCard().getAttribute("data-kind") === "wildcard";
+
+// A shuffled deck can deal a wildcard at any interior position, and a wildcard
+// names only the answerer. Assert who holds which role, not the phrasing.
+const expectTurn = (askerName: string, answererName: string) => {
+  if (isWildcard()) {
+    expect(turn()).toMatch(new RegExp(`^${answererName} does what it says`));
+    return;
+  }
+  expect(turn()).toMatch(
+    new RegExp(`${askerName} asks · ${answererName} answers`)
+  );
+};
 
 describe("WereNotReallyStrangers", () => {
   beforeEach(() => {
@@ -67,13 +80,13 @@ describe("WereNotReallyStrangers", () => {
     startLevelOne();
 
     expect(progress()).toBe(`1 of ${deckSize(1)}`);
-    expect(turn()).toMatch(/Alex asks · Sam answers/);
+    expectTurn("Alex", "Sam");
 
     clickAnswered();
-    expect(turn()).toMatch(/Sam asks · Alex answers/);
+    expectTurn("Sam", "Alex");
 
     clickSkip();
-    expect(turn()).toMatch(/Alex asks · Sam answers/);
+    expectTurn("Alex", "Sam");
     expect(progress()).toBe(`3 of ${deckSize(1)}`);
   });
 
@@ -186,13 +199,40 @@ describe("WereNotReallyStrangers", () => {
     expect(
       screen.getByRole("heading", { level: 2, name: /the final card/i })
     ).toBeInTheDocument();
-    expect(screen.getByRole("article", { name: /final card/i })).toBeInTheDocument();
+    expect(activeCard()).toHaveAttribute("data-kind", "final");
     expect(screen.queryByLabelText(/card progress/i)).not.toBeInTheDocument();
 
     fireEvent.click(screen.getByRole("button", { name: /play again/i }));
     expect(
       screen.getByRole("button", { name: /start level 1: perception/i })
     ).toBeInTheDocument();
+  });
+
+  test("tapping the card opens the focus overlay and tapping outside closes it", () => {
+    render(<WereNotReallyStrangers />);
+    startLevelOne();
+
+    const cardText =
+      within(activeCard()).getByTestId("active-card-text").textContent ?? "";
+    expect(cardText.length).toBeGreaterThan(0);
+
+    fireEvent.click(activeCard());
+
+    const dialog = screen.getByRole("dialog", { name: /enlarged card/i });
+    expect(dialog).toHaveTextContent(cardText);
+    // The turn line follows the card into the overlay.
+    expect(screen.getAllByLabelText(/^turn$/i).length).toBeGreaterThan(1);
+
+    // Tapping the card itself keeps the overlay open.
+    fireEvent.click(within(dialog).getByRole("article"));
+    expect(screen.getByRole("dialog", { name: /enlarged card/i })).toBeInTheDocument();
+
+    fireEvent.click(dialog.parentElement as HTMLElement);
+    expect(screen.queryByRole("dialog", { name: /enlarged card/i })).not.toBeInTheDocument();
+
+    // Closing hands control straight back to the game.
+    clickAnswered();
+    expect(progress()).toBe(`2 of ${deckSize(1)}`);
   });
 
   test("exhausting a level shows the summary with per-player sips", () => {
@@ -221,6 +261,6 @@ describe("WereNotReallyStrangers", () => {
     fireEvent.click(screen.getByRole("button", { name: /back to level select/i }));
 
     expect(screen.getByRole("button", { name: /start level 2: connection/i })).toBeInTheDocument();
-    expect(screen.queryByRole("article")).not.toBeInTheDocument();
+    expect(screen.queryByTestId("active-card")).not.toBeInTheDocument();
   });
 });

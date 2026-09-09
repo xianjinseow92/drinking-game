@@ -9,6 +9,7 @@ import HistoryRoundedIcon from "@mui/icons-material/HistoryRounded";
 import PageLayout from "layout/PageLayout.component";
 
 import WnrsActiveCard from "./components/WnrsActiveCard.component";
+import WnrsCardOverlay from "./components/WnrsCardOverlay.component";
 import WnrsHistoryDrawer, {
   countSips,
 } from "./components/WnrsHistoryDrawer.component";
@@ -110,6 +111,7 @@ const WereNotReallyStrangers = () => {
   const [isRulesOpen, setIsRulesOpen] = useState(false);
   const [isHistoryOpen, setIsHistoryOpen] = useState(false);
   const [isCardVisible, setIsCardVisible] = useState(false);
+  const [isCardFocused, setIsCardFocused] = useState(false);
 
   const playerNames = useMemo<TWnrsPlayerNames>(
     () => ({
@@ -132,6 +134,8 @@ const WereNotReallyStrangers = () => {
   // Fade each new card in. Keyed on the card id so re-renders of the same
   // card don't restart the animation.
   useEffect(() => {
+    setIsCardFocused(false);
+
     if (!activeCard) {
       setIsCardVisible(false);
       return undefined;
@@ -246,7 +250,7 @@ const WereNotReallyStrangers = () => {
       return (
         <>
           {answererTag}
-          <span>, do what it says.</span>
+          <span>does what it says.</span>
         </>
       );
     }
@@ -352,12 +356,13 @@ const WereNotReallyStrangers = () => {
                 )}
               </Box>
 
-              {/* Focus: the card. */}
+              {/* Focus: the card. Tap it to fill the screen. */}
               <WnrsActiveCard
                 key={activeCard.id}
                 card={activeCard}
                 eyebrow={eyebrow}
                 isVisible={isCardVisible}
+                onClick={() => setIsCardFocused(true)}
               />
 
               {/* One line that says whose turn it is. */}
@@ -554,6 +559,33 @@ const WereNotReallyStrangers = () => {
           )}
         </Box>
       </PageLayout>
+
+      {/* Tapping the card darkens the room and blows the card up, so the
+          two of them can sit with the question and nothing else. */}
+      <WnrsCardOverlay
+        card={isCardFocused ? activeCard : null}
+        eyebrow={eyebrow}
+        onClose={() => setIsCardFocused(false)}
+      >
+        <Typography
+          aria-label="Turn"
+          variant="body1"
+          component="div"
+          sx={{
+            mb: 0,
+            color: "#fff7fb",
+            fontSize: { xs: "1.02rem", md: "1.1rem" },
+            lineHeight: 1,
+            display: "flex",
+            alignItems: "center",
+            justifyContent: "center",
+            flexWrap: "wrap",
+            gap: 0.6,
+          }}
+        >
+          {turnLine}
+        </Typography>
+      </WnrsCardOverlay>
 
       <WnrsRulesDrawer open={isRulesOpen} onClose={() => setIsRulesOpen(false)} />
       <WnrsHistoryDrawer
