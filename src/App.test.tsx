@@ -63,6 +63,18 @@ test("deep links straight into a game and the back button returns to the menu", 
   ).toBeInTheDocument();
 });
 
+test("the menu links out to Taboo Game on its own site", async () => {
+  render(
+    <MemoryRouter initialEntries={["/"]}>
+      <App />
+    </MemoryRouter>
+  );
+
+  expect(
+    await screen.findByRole("link", { name: /taboo game/i })
+  ).toHaveAttribute("href", "https://xianjinseow92.github.io/taboo-game/");
+});
+
 test("unknown paths redirect to the menu", async () => {
   render(
     <MemoryRouter initialEntries={["/nope"]}>

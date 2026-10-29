@@ -9,6 +9,7 @@ import PageLayout from "layout/PageLayout.component";
 import Button from "@mui/material/Button";
 
 // Constants / Helpers
+import { externalGames } from "constants/constants";
 import { cleanKebabString, removeAllSlashes } from "helpers/helpers";
 
 // Typography
@@ -53,6 +54,19 @@ const GameSelectPage = (props: any) => {
           sx={{ marginBottom: marginBottom }}
         >
           {gameRoute.label ?? removeAllSlashes(cleanKebabString(gameRoute.name))}
+        </Button>
+      ))}
+
+      {/* Links to games hosted on their own sites */}
+      {externalGames.map((game) => (
+        <Button
+          key={game.url}
+          variant="contained"
+          color="secondary"
+          href={game.url}
+          sx={{ marginBottom: marginBottom }}
+        >
+          {game.label}
         </Button>
       ))}
     </PageLayout>
